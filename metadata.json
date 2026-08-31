@@ -1,0 +1,6 @@
+{
+  "name": "Learn with Mohanna",
+  "description": "Interactive AI-powered English learning platform for Persian speakers from beginner to intermediate, featuring smart conversation tutor, dictionary, placement test, gamified challenges, and community learning.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
