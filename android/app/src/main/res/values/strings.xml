@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LWMM</string>
+    <string name="title_activity_main">LWMM</string>
+    <string name="package_name">com.lwmm.app</string>
+    <string name="custom_url_scheme">com.lwmm.app</string>
+</resources>
