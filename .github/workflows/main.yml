@@ -19,38 +19,51 @@ jobs:
       uses: actions/checkout@v4
 
 
-    # نصب Node
+    # نصب Node.js
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 24
 
 
-    # نصب پکیج ها
+    # نصب پکیج‌ها
     - name: Install dependencies
       run: npm install
 
 
-    # ساخت نسخه وب React
+    # Build پروژه React
     - name: Build React App
       run: npm run build
 
 
-    # نصب Java برای Android
-    - name: Setup Java 17
+    # نصب Java 21
+    - name: Setup Java 21
       uses: actions/setup-java@v4
       with:
         distribution: temurin
-        java-version: 17
+        java-version: 21
 
 
-    # نصب Capacitor اگر در package نیست
+    # بررسی نسخه Java
+    - name: Check Java version
+      run: java -version
+
+
+    # نصب Capacitor
     - name: Install Capacitor
       run: |
         npm install @capacitor/core @capacitor/cli @capacitor/android
 
 
-    # انتقال تغییرات به Android
+    # ساخت Android اگر وجود ندارد
+    - name: Add Android Platform
+      run: |
+        if [ ! -d "android" ]; then
+          npx cap add android
+        fi
+
+
+    # Sync Capacitor
     - name: Capacitor Sync
       run: |
         npx cap sync android
@@ -64,7 +77,7 @@ jobs:
         ./gradlew assembleDebug
 
 
-    # آماده کردن فایل APK برای دانلود
+    # آپلود APK
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
