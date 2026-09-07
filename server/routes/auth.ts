@@ -73,17 +73,25 @@ authRouter.post('/login', (req, res) => {
 authRouter.get('/me', (req, res) => {
   const user = getAuthUser(req);
   if (!user) {
-    // Return demo user if token is missing/guest
-    const demo = db.getUserById('usr_demo_1');
-    return res.json({ user: demo, token: 'token_demo_user' });
+    return res.json({ user: null });
   }
   res.json({ user });
 });
 
+// Logout
+authRouter.post('/logout', (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.replace('Bearer ', '').trim();
+    db.sessions.delete(token);
+  }
+  res.json({ success: true, message: 'با موفقیت خارج شدید' });
+});
+
 // Update Profile
 authRouter.post('/update-profile', (req, res) => {
-  const user = getAuthUser(req) || db.getUserById('usr_demo_1');
-  if (!user) return res.status(401).json({ error: 'کاربر یافت نشد' });
+  const user = getAuthUser(req);
+  if (!user) return res.status(401).json({ error: 'لطفاً ابتدا وارد حساب خود شوید' });
 
   const { fullName, ageRange, englishLevel, learningGoal } = req.body;
   const updated = db.updateUser(user.id, {
@@ -94,6 +102,15 @@ authRouter.post('/update-profile', (req, res) => {
   });
 
   res.json({ user: updated });
+});
+
+// Reset Progress (Zero out all XP, streak, words, quizzes)
+authRouter.post('/reset-progress', (req, res) => {
+  const user = getAuthUser(req);
+  if (!user) return res.status(401).json({ error: 'لطفاً ابتدا وارد حساب خود شوید' });
+
+  const updated = db.resetUserProgress(user.id);
+  res.json({ success: true, user: updated, message: 'پیشرفت شما با موفقیت از صفر تنظیم شد.' });
 });
 
 // Forgot Password

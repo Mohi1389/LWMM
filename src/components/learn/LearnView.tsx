@@ -198,53 +198,58 @@ export const LearnView: React.FC<LearnViewProps> = ({ onNavigateToAI }) => {
   return (
     <div className="space-y-6 pb-12 animate-fade-in" id="learn-view">
       {/* 1. Header & Segment Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col items-center justify-center text-center gap-4 w-full" id="learn-header-container">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
             {language === 'fa' ? 'مرکز آموزش و یادگیری' : 'Learning Hub'}
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-lg mx-auto">
             {language === 'fa'
               ? 'بانک لغات، دیکشنری هوشمند و درسنامه‌های کاربردی گرامر'
               : 'Vocabulary decks, AI dictionary, and grammar guides'}
           </p>
         </div>
 
-        {/* Segmented Switcher */}
-        <div className="flex bg-slate-100 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 self-start sm:self-auto">
-          <button
-            onClick={() => {
-              setActiveSubTab('vocab');
-              setIsFlashcardMode(false);
-            }}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeSubTab === 'vocab'
-                ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-sm'
-                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
-            }`}
-          >
-            {language === 'fa' ? 'بانک لغات' : 'Vocabulary'}
-          </button>
-          <button
-            onClick={() => setActiveSubTab('dictionary')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeSubTab === 'dictionary'
-                ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-sm'
-                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
-            }`}
-          >
-            {language === 'fa' ? 'دیکشنری هوشمند' : 'AI Dictionary'}
-          </button>
-          <button
-            onClick={() => setActiveSubTab('grammar')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeSubTab === 'grammar'
-                ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-sm'
-                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
-            }`}
-          >
-            {language === 'fa' ? 'درسنامه گرامر' : 'Grammar'}
-          </button>
+        {/* Segmented Switcher: Exactly centered */}
+        <div className="flex items-center justify-center w-full pt-1" id="learn-subtabs-wrapper">
+          <div className="inline-flex items-center justify-center bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 shadow-xs max-w-full overflow-x-auto">
+            <button
+              id="subtab-vocab-btn"
+              onClick={() => {
+                setActiveSubTab('vocab');
+                setIsFlashcardMode(false);
+              }}
+              className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
+                activeSubTab === 'vocab'
+                  ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              {language === 'fa' ? 'بانک لغات' : 'Vocabulary'}
+            </button>
+            <button
+              id="subtab-dictionary-btn"
+              onClick={() => setActiveSubTab('dictionary')}
+              className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
+                activeSubTab === 'dictionary'
+                  ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              {language === 'fa' ? 'دیکشنری هوشمند' : 'AI Dictionary'}
+            </button>
+            <button
+              id="subtab-grammar-btn"
+              onClick={() => setActiveSubTab('grammar')}
+              className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
+                activeSubTab === 'grammar'
+                  ? 'bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              {language === 'fa' ? 'درسنامه گرامر' : 'Grammar'}
+            </button>
+          </div>
         </div>
       </div>
 

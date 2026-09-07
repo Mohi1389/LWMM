@@ -82,6 +82,115 @@ communityRouter.post('/posts/:id/comments', (req, res) => {
   }
 });
 
+// Like post
+communityRouter.post('/posts/:id/like', (req, res) => {
+  const likes = db.likePost(req.params.id);
+  res.json({ success: true, likes });
+});
+
+// Report post
+communityRouter.post('/posts/:id/report', (req, res) => {
+  const user = getAuthUser(req) || db.getUserById('usr_demo_1');
+  const report = db.reportContent({
+    targetType: 'post',
+    targetId: req.params.id,
+    targetContent: req.body.reason || 'محتوای نامناسب',
+    reporterId: user ? user.id : 'anonymous',
+    reporterName: user ? user.fullName : 'کاربر مهنا',
+    reason: req.body.reason || 'محتوای نامناسب',
+  });
+  res.json({ success: true, report });
+});
+
+// Get expressions
+communityRouter.get('/expressions', (req, res) => {
+  const category = req.query.category as string;
+  const list = db.getCommunityExpressions(category);
+  res.json(list);
+});
+
+// Create expression
+communityRouter.post('/expressions', (req, res) => {
+  try {
+    const user = getAuthUser(req) || db.getUserById('usr_demo_1');
+    if (!user) return res.status(401).json({ error: 'کاربر یافت نشد' });
+
+    const { english, persian, pronunciation, exampleEn, exampleFa, usageNoteFa, category, difficulty } = req.body;
+    if (!english || !persian || !exampleEn || !exampleFa) {
+      return res.status(400).json({ error: 'اطلاعات اصطلاح یا واژه ناقص است.' });
+    }
+
+    const newExp = db.addCommunityExpression({
+      english,
+      persian,
+      pronunciation,
+      exampleEn,
+      exampleFa,
+      usageNoteFa,
+      category: category || 'idiom',
+      difficulty: difficulty || 'beginner',
+      submittedBy: user.fullName,
+    });
+
+    db.addXpAndStreak(user.id, 20);
+    res.status(201).json(newExp);
+  } catch (error: any) {
+    res.status(500).json({ error: 'خطا در ثبت اصطلاح' });
+  }
+});
+
+// Like expression
+communityRouter.post('/expressions/:id/like', (req, res) => {
+  const likes = db.likeCommunityExpression(req.params.id);
+  res.json({ success: true, likes });
+});
+
+// Get grammar tips
+communityRouter.get('/grammar-tips', (req, res) => {
+  const category = req.query.category as string;
+  const list = db.getGrammarHelpTips(category);
+  res.json(list);
+});
+
+// Create grammar tip
+communityRouter.post('/grammar-tips', (req, res) => {
+  try {
+    const user = getAuthUser(req) || db.getUserById('usr_demo_1');
+    if (!user) return res.status(401).json({ error: 'کاربر یافت نشد' });
+
+    const { titleFa, titleEn, incorrectExample, correctExample, commonMistake, correctForm, explanationFa, goldenRuleFa, persianContext, difficulty, category } = req.body;
+    const incorrect = incorrectExample || commonMistake;
+    const correct = correctExample || correctForm;
+
+    if (!titleFa || !incorrect || !correct || !explanationFa) {
+      return res.status(400).json({ error: 'اطلاعات نکته گرامری ناقص است.' });
+    }
+
+    const newTip = db.addGrammarHelpTip({
+      titleFa,
+      titleEn: titleEn || '',
+      incorrectExample: incorrect,
+      correctExample: correct,
+      explanationFa,
+      goldenRuleFa: goldenRuleFa || '',
+      persianContext: persianContext || '',
+      difficulty: difficulty || 'beginner',
+      category: category || 'sentence_structure',
+    });
+
+    db.addXpAndStreak(user.id, 20);
+    res.status(201).json(newTip);
+  } catch (error: any) {
+    res.status(500).json({ error: 'خطا در ثبت نکته گرامری' });
+  }
+});
+
+// Like grammar tip
+communityRouter.post('/grammar-tips/:id/like', (req, res) => {
+  const likes = db.likeGrammarHelpTip(req.params.id);
+  res.json({ success: true, likes });
+});
+
 // Report inappropriate content
 communityRouter.post('/report', (req, res) => {
   try {

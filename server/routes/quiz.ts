@@ -26,7 +26,7 @@ quizRouter.post('/submit', (req, res) => {
     const user = getAuthUser(req) || db.getUserById('usr_demo_1');
     if (!user) return res.status(401).json({ error: 'کاربر یافت نشد' });
 
-    const { quizId, answers } = req.body; // answers: { [questionId]: string }
+    const { quizId, answers, timeSpentSeconds } = req.body; // answers: { [questionId]: string }
     const quiz = db.getQuizById(quizId);
     if (!quiz) return res.status(404).json({ error: 'آزمون یافت نشد' });
 
@@ -51,35 +51,65 @@ quizRouter.post('/submit', (req, res) => {
       });
     });
 
-    const percentage = Math.round((score / quiz.questions.length) * 100);
+    const totalQ = quiz.questions.length;
+    const percentage = Math.round((score / totalQ) * 100);
+
+    // Calculate Speed Rating
+    const timeSpent = typeof timeSpentSeconds === 'number' ? timeSpentSeconds : 60;
+    const avgSecondsPerQ = totalQ > 0 ? timeSpent / totalQ : 15;
+    let speedRating: 'lightning' | 'fast' | 'moderate' | 'careful' = 'moderate';
+    let speedAssessmentFa = 'سرعت مناسب و طبیعی در پاسخ‌دهی';
+    if (avgSecondsPerQ < 6) {
+      speedRating = 'lightning';
+      speedAssessmentFa = 'سرعت فوق‌العاده بالا و تسلط آنی';
+    } else if (avgSecondsPerQ < 12) {
+      speedRating = 'fast';
+      speedAssessmentFa = 'سرعت بسیار خوب و با اعتمادبه‌نفس';
+    } else if (avgSecondsPerQ > 25) {
+      speedRating = 'careful';
+      speedAssessmentFa = 'دقیق، متمرکز و با تامل کافی';
+    }
 
     const strengths: string[] = Array.from(strongCategories).map((c) =>
-      c === 'grammar' ? 'تسلط مناسب بر ساختارهای گرامری پایه' : 'دایره واژگان و درک معانی'
+      c === 'grammar'
+        ? 'تسلط مناسب بر ساختارهای گرامری و زمان‌های فعل'
+        : c === 'vocabulary'
+        ? 'دایره واژگان پرکاربرد و معانی لغات'
+        : 'درک مفهوم و کاربرد در مکالمه واقعی'
     );
-    if (strengths.length === 0) strengths.push('انگیزه بالا برای شروع و یادگیری');
+    if (strengths.length === 0) strengths.push('انگیزه بالا برای شروع و تلاش مستمر');
 
     const weaknesses: string[] = Array.from(weakCategories).map((c) =>
-      c === 'grammar' ? 'مرور افعال بی‌قاعده و حروف اضافه' : 'تمرین بیشتر لغات متضاد و مترادف'
+      c === 'grammar'
+        ? 'مرور افعال بی‌قاعده، حروف اضافه و ساختار جملات سوالی'
+        : c === 'vocabulary'
+        ? 'تمرین بیشتر روی تفاوت لغات مشابه و اصطلاحات روزمره'
+        : 'توجه به جزئیات کاربردی در موقعیت‌های طبیعی'
     );
-    if (weaknesses.length === 0) weaknesses.push('عملکرد بدون نقص! می‌توانید به سطح بعدی بروید.');
+    if (weaknesses.length === 0) {
+      weaknesses.push('عملکرد درخشان و بدون اشتباه! آماده ورود به سطح بالاتر هستید.');
+    }
 
     let estimatedLevel: EnglishLevel | undefined = undefined;
-    let recommendedPath = 'مرور لغات روزمره و انجام تمرین مکالمه با هوش مصنوعی';
+    let recommendedPath = 'مرور روزانه ۱۰ لغت و انجام مکالمه تمرینی با دستیار مهنا.';
 
-    if (quiz.type === 'placement') {
+    // Smart Level Assessment based on percentage, difficulty, and speed
+    if (quiz.type === 'placement' || quiz.level) {
       if (percentage >= 80) {
         estimatedLevel = 'pre-intermediate';
-        recommendedPath = 'شروع دوره گرامر کاربردی، اصطلاحات فیلم‌ها و مکالمات طبیعی‌تر.';
+        recommendedPath = 'شروع دوره گرامر کاربردی B1، یادگیری اصطلاحات فیلم‌ها و مکالمات طبیعی با مهنا.';
       } else if (percentage >= 45) {
         estimatedLevel = 'elementary';
-        recommendedPath = 'تقویت جمله‌سازی ساده، یادگیری ۲۰۰ لغت ضروری و تمرین روزانه مکالمه.';
+        recommendedPath = 'تقویت جمله‌سازی ساده A2، یادگیری لغات ضروری روزمره و تمرین سناریوهای رستوران و سفر.';
       } else {
         estimatedLevel = 'beginner';
-        recommendedPath = 'شروع قدم‌به‌قدم از الفبای گرامر، لغات پایه و مکالمات ساده با مهنا.';
+        recommendedPath = 'شروع قدم‌به‌قدم از گرامر پایه A1، یادگیری واژگان اساسی و مکالمات ساده و شمرده با مهنا.';
       }
 
-      // Update user level automatically
-      db.updateUser(user.id, { englishLevel: estimatedLevel });
+      // If this is a placement test, persist updated level
+      if (quiz.type === 'placement') {
+        db.updateUser(user.id, { englishLevel: estimatedLevel });
+      }
     }
 
     const result: QuizResult = {
@@ -88,8 +118,12 @@ quizRouter.post('/submit', (req, res) => {
       quizId: quiz.id,
       quizTitle: quiz.titleFa,
       score,
-      totalQuestions: quiz.questions.length,
+      totalQuestions: totalQ,
       percentage,
+      timeSpentSeconds: timeSpent,
+      averageSecondsPerQuestion: Math.round(avgSecondsPerQ * 10) / 10,
+      speedRating,
+      speedAssessmentFa,
       answers: evaluatedAnswers,
       strengths,
       weaknesses,
@@ -102,7 +136,7 @@ quizRouter.post('/submit', (req, res) => {
 
     res.json({
       result,
-      xpGained: Math.round(score * 10),
+      xpGained: Math.round(score * 10 + (speedRating === 'fast' ? 15 : 5)),
       updatedLevel: estimatedLevel,
     });
   } catch (error: any) {

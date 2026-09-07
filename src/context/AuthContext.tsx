@@ -16,7 +16,9 @@ interface AuthContextType {
   }) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateProfile: (data: Partial<User>) => Promise<void>;
+  updateUserProfile: (data: Partial<User>) => Promise<void>;
   updateUserLevel: (level: EnglishLevel) => Promise<void>;
+  resetProgress: () => Promise<void>;
   addXp: (amount: number) => void;
   isPlacementModalOpen: boolean;
   openPlacementModal: () => void;
@@ -42,30 +44,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Fetch current user on mount or token change
   useEffect(() => {
+    let isMounted = true;
     const fetchUser = async () => {
+      if (!token) {
+        if (isMounted) {
+          setUser(null);
+          setLoading(false);
+        }
+        return;
+      }
+
       setLoading(true);
       try {
         const res = await fetch('/api/auth/me', {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
           const data = await res.json();
-          if (data.user) {
-            setUser(data.user);
-            if (data.token && !token) {
-              setToken(data.token);
-              localStorage.setItem('auth_token', data.token);
+          if (isMounted) {
+            if (data.user) {
+              setUser(data.user);
+            } else {
+              setUser(null);
+              setToken(null);
+              localStorage.removeItem('auth_token');
             }
           }
+        } else {
+          if (isMounted) {
+            setUser(null);
+            setToken(null);
+            localStorage.removeItem('auth_token');
+          }
         }
-      } catch (err) {
-        console.error('Failed to load user:', err);
+      } catch {
+        // Silently fallback on network error/offline
+        if (isMounted) {
+          setUser(null);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchUser();
+    return () => {
+      isMounted = false;
+    };
   }, [token]);
 
   const login = async (email: string, pass: string) => {
@@ -124,7 +151,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    if (token) {
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch (err) {
+        console.error('Logout API error:', err);
+      }
+    }
     setUser(null);
     setToken(null);
     localStorage.removeItem('auth_token');
@@ -156,6 +193,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await updateProfile({ englishLevel: level });
   };
 
+  const resetProgress = async () => {
+    try {
+      const res = await fetch('/api/auth/reset-progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token ? `Bearer ${token}` : '',
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) {
+          setUser(data.user);
+        }
+      }
+    } catch (err) {
+      console.error('Reset progress error:', err);
+    }
+  };
+
   const addXp = (amount: number) => {
     if (user) {
       setUser({
@@ -180,7 +237,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signup,
         logout,
         updateProfile,
+        updateUserProfile: updateProfile,
         updateUserLevel,
+        resetProgress,
         addXp,
         isPlacementModalOpen,
         openPlacementModal: () => setIsPlacementModalOpen(true),

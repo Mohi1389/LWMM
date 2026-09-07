@@ -25,7 +25,7 @@ interface DashboardViewProps {
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
-  const { user, openPlacementModal } = useAuth();
+  const { user, openPlacementModal, openAuthModal } = useAuth();
   const { language, t } = useLanguage();
 
   const [progress, setProgress] = useState<LearningProgress | null>(null);
@@ -77,63 +77,82 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   };
 
   const dailyGoal = progress?.todayGoal || {
-    wordsLearned: 2,
+    wordsLearned: 0,
     targetWords: 5,
-    aiPracticeDone: true,
+    aiPracticeDone: false,
     quizCompleted: false,
   };
 
-  const goalPercentage = Math.round(
+  const goalPercentage = dailyGoal.targetWords > 0 ? Math.round(
     ((dailyGoal.wordsLearned / dailyGoal.targetWords) * 0.4 +
       (dailyGoal.aiPracticeDone ? 0.3 : 0) +
       (dailyGoal.quizCompleted ? 0.3 : 0)) *
       100
-  );
+  ) : 0;
 
   return (
-    <div className="space-y-6 pb-12 animate-fade-in" id="dashboard-view">
+    <div className="space-y-5 sm:space-y-6 pb-12 animate-fade-in" id="dashboard-view">
       {/* 1. Welcome & Stats Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-600 via-sky-700 to-indigo-800 text-white p-6 sm:p-8 shadow-xl shadow-sky-600/15">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-600 via-sky-700 to-indigo-800 text-white p-5 sm:p-8 shadow-xl shadow-sky-600/15">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/15 backdrop-blur-md text-[11px] sm:text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300 flex-shrink-0" />
               <span>
                 {language === 'fa' ? 'سطح آموزشی شما:' : 'Your Level:'}{' '}
                 <strong className="capitalize font-en">{user?.englishLevel || 'Beginner'}</strong>
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
-              {language === 'fa'
-                ? `خوش برگشتی، ${user?.fullName || 'زبان‌آموز عزیز'} 👋`
-                : `Welcome back, ${user?.fullName || 'Learner'} 👋`}
+            <h1 className="text-xl sm:text-3xl font-black tracking-tight leading-snug break-words">
+              {user
+                ? language === 'fa'
+                  ? `خوش برگشتی، ${user.fullName || 'زبان‌آموز عزیز'} 👋`
+                  : `Welcome back, ${user.fullName || 'Learner'} 👋`
+                : language === 'fa'
+                ? 'به پلتفرم هوشمند آموزش زبان مهنا خوش آمدید 👋'
+                : 'Welcome to Learn with Mohanna 👋'}
             </h1>
-            <p className="text-sm text-sky-100 max-w-xl leading-relaxed">
-              {language === 'fa'
-                ? 'امروز زمان فوق‌العاده‌ای برای یادگیری لغات جدید و مکالمه با مهنا است. بیایید شروع کنیم!'
-                : 'Ready for today’s micro-lesson and AI dialogue practice?'}
+            <p className="text-xs sm:text-sm text-sky-100 max-w-xl leading-relaxed">
+              {user
+                ? language === 'fa'
+                  ? 'امروز زمان فوق‌العاده‌ای برای یادگیری لغات جدید و مکالمه با مهنا است. بیایید شروع کنیم!'
+                  : 'Ready for today’s micro-lesson and AI dialogue practice?'
+                : language === 'fa'
+                ? 'برای ذخیره لغات، محاسبه امتیاز XP، شرکت در آزمون‌ها و مکالمه با هوش مصنوعی وارد حساب خود شوید.'
+                : 'Log in to track your personalized streaks, save words, and chat with AI.'}
             </p>
+            {!user && (
+              <div className="pt-2">
+                <button
+                  onClick={openAuthModal}
+                  className="px-4 py-2 rounded-xl bg-white text-sky-700 hover:bg-sky-50 font-bold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-sky-600" />
+                  <span>{language === 'fa' ? 'ورود / ایجاد حساب کاربری رایگان' : 'Login / Create Free Account'}</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Quick Streak & XP Cards */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 sm:flex-none p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-center min-w-[110px]">
-              <div className="flex items-center justify-center gap-1.5 text-amber-300 mb-1">
-                <Flame className="w-5 h-5 fill-amber-400 text-amber-400" />
-                <span className="text-xl font-black font-mono">{user?.streak || 4}</span>
+          <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+            <div className="flex-1 sm:flex-none p-3 sm:p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-center min-w-[80px] sm:min-w-[110px]">
+              <div className="flex items-center justify-center gap-1 sm:gap-1.5 text-amber-300 mb-0.5 sm:mb-1">
+                <Flame className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-400 text-amber-400" />
+                <span className="text-lg sm:text-xl font-black font-mono">{user?.streak ?? 0}</span>
               </div>
-              <span className="text-[11px] text-sky-100 font-medium">
+              <span className="text-[10px] sm:text-[11px] text-sky-100 font-medium whitespace-nowrap">
                 {language === 'fa' ? 'روز استمرار' : 'Day Streak'}
               </span>
             </div>
 
-            <div className="flex-1 sm:flex-none p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-center min-w-[110px]">
-              <div className="flex items-center justify-center gap-1.5 text-cyan-200 mb-1">
-                <Sparkles className="w-5 h-5 text-cyan-300" />
-                <span className="text-xl font-black font-mono">{user?.xp || 320}</span>
+            <div className="flex-1 sm:flex-none p-3 sm:p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-center min-w-[80px] sm:min-w-[110px]">
+              <div className="flex items-center justify-center gap-1 sm:gap-1.5 text-cyan-200 mb-0.5 sm:mb-1">
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-300" />
+                <span className="text-lg sm:text-xl font-black font-mono">{user?.xp ?? 0}</span>
               </div>
-              <span className="text-[11px] text-sky-100 font-medium">
+              <span className="text-[10px] sm:text-[11px] text-sky-100 font-medium whitespace-nowrap">
                 {language === 'fa' ? 'مجموع XP' : 'Total XP'}
               </span>
             </div>

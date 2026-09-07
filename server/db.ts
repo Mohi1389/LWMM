@@ -7,6 +7,8 @@ import {
   CommunityRoom,
   CommunityPost,
   CommunityComment,
+  CommunityExpression,
+  GrammarHelpTip,
   ModerationReport,
   VideoContent,
   Achievement,
@@ -27,6 +29,8 @@ class Database {
   quizResults: Map<string, QuizResult[]> = new Map(); // userId -> QuizResult[]
   communityRooms: Map<string, CommunityRoom> = new Map();
   communityPosts: Map<string, CommunityPost> = new Map();
+  communityExpressions: Map<string, CommunityExpression> = new Map();
+  grammarHelpTips: Map<string, GrammarHelpTip> = new Map();
   moderationReports: Map<string, ModerationReport> = new Map();
   videoLessons: Map<string, VideoContent> = new Map();
   achievements: Map<string, Achievement[]> = new Map(); // userId -> Achievement[]
@@ -39,7 +43,7 @@ class Database {
   }
 
   seedInitialData() {
-    // 1. Default Users (Demo Learner + Admin)
+    // 1. Default Users (Clean 0-state Learner + Admin)
     const demoUser: User & { passwordHash: string } = {
       id: 'usr_demo_1',
       fullName: 'مهنا کریمی',
@@ -49,10 +53,10 @@ class Database {
       englishLevel: 'beginner',
       learningGoal: 'speaking',
       role: 'user',
-      xp: 320,
-      streak: 4,
-      lastActiveDate: new Date().toISOString().split('T')[0],
-      createdAt: new Date(Date.now() - 4 * 86400000).toISOString(),
+      xp: 0,
+      streak: 0,
+      lastActiveDate: '',
+      createdAt: new Date().toISOString(),
     };
 
     const adminUser: User & { passwordHash: string } = {
@@ -64,10 +68,10 @@ class Database {
       englishLevel: 'pre-intermediate',
       learningGoal: 'general',
       role: 'admin',
-      xp: 1500,
-      streak: 14,
-      lastActiveDate: new Date().toISOString().split('T')[0],
-      createdAt: new Date(Date.now() - 30 * 86400000).toISOString(),
+      xp: 0,
+      streak: 0,
+      lastActiveDate: '',
+      createdAt: new Date().toISOString(),
     };
 
     this.users.set(demoUser.id, demoUser);
@@ -237,22 +241,17 @@ class Database {
 
     initialVocab.forEach((v) => this.vocabulary.set(v.id, v));
 
-    // Seed Saved Words for demo user
-    this.savedWords.set(demoUser.id, [
-      { id: 'sw_1', userId: demoUser.id, wordId: 'voc_1', savedAt: new Date().toISOString(), masteryLevel: 3 },
-      { id: 'sw_2', userId: demoUser.id, wordId: 'voc_2', savedAt: new Date().toISOString(), masteryLevel: 4 },
-      { id: 'sw_3', userId: demoUser.id, wordId: 'voc_5', savedAt: new Date().toISOString(), masteryLevel: 2 },
-    ]);
+    // Clean Initial Saved & Learned Words for demo user (Starting from 0)
+    this.savedWords.set(demoUser.id, []);
+    this.learnedWords.set(demoUser.id, new Set());
 
-    this.learnedWords.set(demoUser.id, new Set(['voc_1', 'voc_3', 'voc_10', 'voc_11']));
-
-    // 3. Quizzes (Placement Test + Thematic Quizzes)
+    // 3. Quizzes (Placement Test + Thematic Quizzes - 8 to 10 dynamic questions with bilingual support)
     const placementQuiz: Quiz = {
       id: 'quiz_placement',
       titleFa: 'آزمون تعیین سطح هوشمند',
       titleEn: 'Smart English Placement Test',
-      descriptionFa: 'سنجش جامع مهارت‌های گرامر، واژگان و درک مطلب جهت تعیین دقیق سطح شما',
-      descriptionEn: 'Comprehensive evaluation to accurately calibrate your English starting point.',
+      descriptionFa: 'سنجش جامع ۱۰ سوالی مهارت‌های گرامر، واژگان و درک مطلب جهت تعیین دقیق سطح شما با تحلیل سرعت و دقت',
+      descriptionEn: 'Comprehensive 10-question evaluation to accurately calibrate your English starting point.',
       type: 'placement',
       level: 'unknown',
       xpReward: 100,
@@ -264,6 +263,7 @@ class Database {
           promptFa: 'کدام گزینه جمله را به درستی کامل می‌کند؟',
           promptEn: 'She _______ to school every morning by bus.',
           options: ['go', 'goes', 'going', 'is go'],
+          optionsFa: ['رفتن (ساده)', 'می‌رود (سوم‌شخص مفرد)', 'در حال رفتن', 'رفتن با فعل to be'],
           correctAnswer: 'goes',
           explanationFa: 'برای فاعل سوم‌شخص مفرد (She) در زمان حال ساده، به فعل پسوند -s یا -es اضافه می‌شود.',
           explanationEn: 'Third-person singular in present simple takes -s or -es.',
@@ -273,10 +273,11 @@ class Database {
         {
           id: 'pq_2',
           type: 'multiple-choice',
-          promptFa: 'معنی دقیق کلمه "Encourage" چیست؟',
-          promptEn: 'What does "Encourage" mean?',
-          options: ['تشویق کردن', 'تنبیه کردن', 'ترک کردن', 'شکست خوردن'],
-          correctAnswer: 'تشویق کردن',
+          promptFa: 'معنی دقیق واژه "Encourage" چیست؟',
+          promptEn: 'What is the precise meaning of "Encourage"?',
+          options: ['تشویق کردن و دلگرمی دادن', 'تنبیه و سرزنش کردن', 'ترک کردن و فرار کردن', 'شکست خوردن در مسابقه'],
+          optionsFa: ['To give support and confidence', 'To punish or blame', 'To abandon or escape', 'To fail in a match'],
+          correctAnswer: 'تشویق کردن و دلگرمی دادن',
           explanationFa: 'واژه Encourage به معنی دلگرم کردن و تشویق کردن دیگران است.',
           explanationEn: 'Encourage means giving someone support, confidence or hope.',
           category: 'vocabulary',
@@ -285,9 +286,10 @@ class Database {
         {
           id: 'pq_3',
           type: 'multiple-choice',
-          promptFa: 'شکل گذشته فعل "buy" چیست؟',
-          promptEn: 'What is the past tense form of "buy"?',
+          promptFa: 'شکل گذشته ساده فعل "buy" چیست؟',
+          promptEn: 'What is the past tense form of the irregular verb "buy"?',
           options: ['buyed', 'bought', 'buying', 'boight'],
+          optionsFa: ['حالت اشتباه با ed', 'خرید (گذشته صحیح)', 'در حال خرید', 'املای نادرست'],
           correctAnswer: 'bought',
           explanationFa: 'فعل buy بی‌قاعده است و گذشته آن bought می‌شود.',
           explanationEn: 'Buy is an irregular verb. Its simple past form is bought.',
@@ -297,9 +299,10 @@ class Database {
         {
           id: 'pq_4',
           type: 'multiple-choice',
-          promptFa: 'کدام کلمه متضاد (Antonym) واژه "Confident" است؟',
-          promptEn: 'Which word is the antonym of "Confident"?',
+          promptFa: 'کدام کلمه متضاد (Antonym) واژه "Confident" (با اعتمادبه‌نفس) است؟',
+          promptEn: 'Which word is the antonym (opposite) of "Confident"?',
           options: ['Proud', 'Shy / Insecure', 'Brave', 'Strong'],
+          optionsFa: ['مغرور / مفتخر', 'خجالتی / نامطمئن به خود', 'شجاع و نترس', 'قوی و نیرومند'],
           correctAnswer: 'Shy / Insecure',
           explanationFa: 'کلمه Insecure به معنی بی‌اعتمادبه‌نفس و Shy به معنی خجالتی است که متضاد Confident هستند.',
           explanationEn: 'Insecure or shy is opposite of confident.',
@@ -310,8 +313,9 @@ class Database {
           id: 'pq_5',
           type: 'multiple-choice',
           promptFa: 'جمله را با حرف اضافه صحیح کامل کنید:',
-          promptEn: 'I am interested _______ learning new languages.',
+          promptEn: 'I am interested _______ learning new languages and culture.',
           options: ['on', 'at', 'in', 'with'],
+          optionsFa: ['روی (حرف اضافه نادرست)', 'در نقطه (نادرست)', 'در / به (حرف اضافه صحیح)', 'همراه با (نادرست)'],
           correctAnswer: 'in',
           explanationFa: 'ترکیب ثابت برای علاقه داشتن interested in است.',
           explanationEn: 'We always say "interested in" something.',
@@ -321,9 +325,10 @@ class Database {
         {
           id: 'pq_6',
           type: 'multiple-choice',
-          promptFa: 'کدام گزینه ساختار شرطی نوع اول را درست نشان می‌دهد؟',
+          promptFa: 'کدام گزینه ساختار شرطی نوع اول (First Conditional) را درست نشان می‌دهد؟',
           promptEn: 'If it _______ tomorrow, we will stay at home.',
           options: ['rains', 'will rain', 'rained', 'is rain'],
+          optionsFa: ['باران ببارد (حال ساده)', 'باران خواهد بارید (نادرست در if)', 'باران بارید (گذشته)', 'ساختار گرامری اشتباه'],
           correctAnswer: 'rains',
           explanationFa: 'در بخش شرطی (if clause) در شرطی نوع اول از حال ساده استفاده می‌کنیم نه will.',
           explanationEn: 'In first conditional if-clauses, we use present simple.',
@@ -333,9 +338,10 @@ class Database {
         {
           id: 'pq_7',
           type: 'multiple-choice',
-          promptFa: 'معنی عبارت "Look forward to" چیست؟',
-          promptEn: 'What does "look forward to" mean?',
-          options: ['به پشت سر نگاه کردن', 'مشتاقانه در انتظار چیزی بودن', 'مواظب کسی بودن', 'جستجو کردن'],
+          promptFa: 'معنی اصطلاح کاربردی "Look forward to" چیست؟',
+          promptEn: 'What does the phrasal idiom "look forward to" mean?',
+          options: ['به پشت سر نگاه کردن', 'مشتاقانه در انتظار چیزی بودن', 'مواظب کسی بودن', 'دنبال گمشده گشتن'],
+          optionsFa: ['To look behind', 'To await eagerly with pleasure', 'To take care of someone', 'To search for lost items'],
           correctAnswer: 'مشتاقانه در انتظار چیزی بودن',
           explanationFa: 'اصطلاح Look forward to یعنی با شوق و اشتیاق منتظر اتفاقی در آینده بودن.',
           explanationEn: 'To anticipate something with pleasure.',
@@ -345,13 +351,40 @@ class Database {
         {
           id: 'pq_8',
           type: 'multiple-choice',
-          promptFa: 'کدام گزینه پاسخ مناسب برای سوال "How long have you lived here?" است؟',
+          promptFa: 'پاسخ صحیح به سوال زمان گذشته کامل "How long have you lived here?" چیست؟',
           promptEn: 'Choose the correct answer for: "How long have you lived here?"',
-          options: ['For five years.', 'Since five years ago.', 'In five years.', 'Both A and B are acceptable.'],
-          correctAnswer: 'Both A and B are acceptable.',
-          explanationFa: 'برای بیان طول مدت زمان از for و برای نقطه آغاز از since استفاده می‌شود.',
-          explanationEn: 'For + duration or since + starting point.',
+          options: ['For five years.', 'Since five years.', 'At five years.', 'On five years.'],
+          optionsFa: ['به مدت ۵ سال (بیان طول مدت)', 'از ۵ سال (کاربرد نادرست since)', 'در ۵ سال', 'روی ۵ سال'],
+          correctAnswer: 'For five years.',
+          explanationFa: 'برای بیان طول مدت زمان از for و برای نقطه مشخص آغاز زمان از since استفاده می‌شود.',
+          explanationEn: 'For + duration (five years) is correct.',
           category: 'grammar',
+          difficulty: 'pre-intermediate',
+        },
+        {
+          id: 'pq_9',
+          type: 'multiple-choice',
+          promptFa: 'کدام عبارت در مکالمه انگلیسی برای موافقت کامل مناسب است؟',
+          promptEn: 'Which sentence correctly expresses full agreement in conversation?',
+          options: ['I am agree with you.', 'I agree with you completely.', 'I am agreeable you.', 'I agreed always.'],
+          optionsFa: ['من موافقم (اشتباه رایج گرامری با am)', 'من کاملاً با شما موافقم (فرم درست)', 'فرم نامفهوم صفت', 'زمان گذشته نامناسب'],
+          correctAnswer: 'I agree with you completely.',
+          explanationFa: 'فعل agree خودش فعل است و نیازی به am ندارد. گفتن "I am agree" از اشتباهات رایج است.',
+          explanationEn: 'Agree is a verb itself, so say "I agree", never "I am agree".',
+          category: 'reading',
+          difficulty: 'elementary',
+        },
+        {
+          id: 'pq_10',
+          type: 'multiple-choice',
+          promptFa: 'معنی عبارت "Break the ice" در ارتباطات اجتماعی چیست؟',
+          promptEn: 'What does the idiom "Break the ice" mean in social communication?',
+          options: ['یخ آب کردن در نوشیدنی', 'شکستن سکوت و آغاز گفتگوی صمیمانه', 'عصبانی شدن در جمع', 'ترک کردن جلسه کاری'],
+          optionsFa: ['Crushing ice in drinks', 'Initiating conversation to ease tension', 'Getting angry in public', 'Leaving a business meeting'],
+          correctAnswer: 'شکستن سکوت و آغاز گفتگوی صمیمانه',
+          explanationFa: 'Break the ice یعنی از بین بردن جو سنگین یا خجالت در ابتدای آشنایی با دیگران.',
+          explanationEn: 'Break the ice means to relieve tension and make people feel comfortable.',
+          category: 'mixed',
           difficulty: 'pre-intermediate',
         },
       ],
@@ -359,22 +392,24 @@ class Database {
 
     const vocabQuiz1: Quiz = {
       id: 'quiz_vocab_1',
-      titleFa: 'آزمون لغات: احساسات و ویژگی‌های فردی',
-      titleEn: 'Vocabulary Quiz: Feelings & Traits',
-      descriptionFa: 'تمرین و تثبیت لغات کلیدی مربوط به شخصیت، احساسات و ارتباطات',
-      descriptionEn: 'Solidify essential words describing personality and mindset.',
+      titleFa: 'آزمون واژگان: احساسات، شخصیت و روابط',
+      titleEn: 'Vocabulary: Feelings, Personality & Mindset',
+      descriptionFa: 'سنجش ۹ سوالی لغات کلیدی و پرکاربرد توصیف رفتار و ویژگی‌های انسانی',
+      descriptionEn: 'Evaluate your mastery of 9 core descriptive words for human emotion and behavior.',
       type: 'vocabulary',
       level: 'beginner',
-      xpReward: 40,
+      xpReward: 60,
+      timeLimitSeconds: 480,
       questions: [
         {
           id: 'vq_1',
           type: 'multiple-choice',
           promptFa: 'معنی کلمه "Resilient" چیست؟',
           promptEn: 'Select the best definition of "Resilient":',
-          options: ['سرسخت و تاب‌آور', 'ناامید و خسته', 'ثروتمند', 'فراموش‌کار'],
-          correctAnswer: 'سرسخت و تاب‌آور',
-          explanationFa: 'Resilient به افرادی گفته می‌شود که در مواجهه با سختی‌ها زود تسلیم نمی‌شوند.',
+          options: ['سرسخت و تاب‌آور در برابر سختی‌ها', 'ناامید و خسته از کار', 'ثروتمند و دارای امکانات', 'فراموش‌کار و حواس‌پرت'],
+          optionsFa: ['Able to bounce back from hardship', 'Depressed and tired', 'Wealthy and resourceful', 'Forgetful and distracted'],
+          correctAnswer: 'سرسخت و تاب‌آور در برابر سختی‌ها',
+          explanationFa: 'Resilient به افرادی گفته می‌شود که پس از سختی‌ها به سرعت بازیابی روحی پیدا می‌کنند.',
           explanationEn: 'Resilient means able to withstand or recover quickly from difficult conditions.',
           category: 'vocabulary',
           difficulty: 'elementary',
@@ -382,11 +417,12 @@ class Database {
         {
           id: 'vq_2',
           type: 'multiple-choice',
-          promptFa: 'جمله را کامل کنید: "She was _______ to know what was inside the box."',
-          promptEn: 'Complete: "She was _______ to know what was inside the box."',
+          promptFa: 'جمله را کامل کنید: "She was _______ to know what was inside the gift box."',
+          promptEn: 'Complete: "She was _______ to know what was inside the gift box."',
           options: ['curious', 'angry', 'fluent', 'tasty'],
+          optionsFa: ['کنجکاو و مشتاق دانستن', 'عصبانی و خشمگین', 'روان در صحبت کردن', 'خوشمزه و لذیذ'],
           correctAnswer: 'curious',
-          explanationFa: 'کلمه Curious به معنی کنجکاو در این جمله مناسب‌ترین گزینه است.',
+          explanationFa: 'کلمه Curious به معنی کنجکاو در این زمینه معنایی بهترین انتخاب است.',
           explanationEn: 'Curious fits the context of wanting to discover what is inside.',
           category: 'vocabulary',
           difficulty: 'beginner',
@@ -394,12 +430,91 @@ class Database {
         {
           id: 'vq_3',
           type: 'multiple-choice',
-          promptFa: 'کلمه "Opportunity" با کدام یک از کلمات زیر هم‌معنی است؟',
-          promptEn: 'Which word is a synonym for "Opportunity"?',
+          promptFa: 'کدام کلمه مترادف دقیق واژه "Opportunity" (فرصت) است؟',
+          promptEn: 'Which word is an exact synonym for "Opportunity"?',
           options: ['Chance', 'Problem', 'Mistake', 'Delay'],
+          optionsFa: ['شانس و فرصت مناسب', 'مشکل و معضل', 'اشتباه و خطا', 'تاخیر و وقفه'],
           correctAnswer: 'Chance',
-          explanationFa: 'Chance و Opportunity هر دو به معنی شانس و فرصت هستند.',
+          explanationFa: 'Chance و Opportunity هر دو به معنی شانس و موقعیت مناسب هستند.',
           explanationEn: 'Opportunity and Chance are direct synonyms.',
+          category: 'vocabulary',
+          difficulty: 'elementary',
+        },
+        {
+          id: 'vq_4',
+          type: 'multiple-choice',
+          promptFa: 'فردی که "Generous" (بخشنده) است چه ویژگی‌ای دارد؟',
+          promptEn: 'A person who is "Generous" is known to:',
+          options: ['Give freely to others', 'Save everything secretly', 'Complain about prices', 'Avoid meeting people'],
+          optionsFa: ['با سخاوت به دیگران می‌بخشد', 'همه چیز را مخفیانه پس‌انداز می‌کند', 'از قیمت‌ها شکایت می‌کند', 'از ملاقات با دیگران دوری می‌کند'],
+          correctAnswer: 'Give freely to others',
+          explanationFa: 'Generous یعنی دست و دلباز و بخشنده.',
+          explanationEn: 'Generous means showing a readiness to give more of something than is strictly necessary.',
+          category: 'vocabulary',
+          difficulty: 'beginner',
+        },
+        {
+          id: 'vq_5',
+          type: 'multiple-choice',
+          promptFa: 'معنی صفت "Punctual" در محیط‌های کاری و درسی چیست؟',
+          promptEn: 'What does it mean if an employee is "Punctual"?',
+          options: ['همیشه سر وقت و دقیق حاضر می‌شود', 'خیلی سریع عصبانی می‌شود', 'زبان‌های خارجی بلد است', 'همیشه با تاخیر می‌آید'],
+          optionsFa: ['Always arriving strictly on time', 'Gets angry very fast', 'Knows foreign languages', 'Always arrives late'],
+          correctAnswer: 'همیشه سر وقت و دقیق حاضر می‌شود',
+          explanationFa: 'Punctual یعنی فرد وقت‌شناس و خوش‌قول در ساعت قرار.',
+          explanationEn: 'Punctual means doing something at the agreed or proper time; on time.',
+          category: 'vocabulary',
+          difficulty: 'elementary',
+        },
+        {
+          id: 'vq_6',
+          type: 'multiple-choice',
+          promptFa: 'کدام واژه متضاد کلمه "Permanent" (دائمی) است؟',
+          promptEn: 'What is the opposite of the adjective "Permanent"?',
+          options: ['Temporary', 'Constant', 'Forever', 'Solid'],
+          optionsFa: ['موقت و گذرا', 'مداوم و پیوسته', 'برای همیشه', 'محکم و یکپارچه'],
+          correctAnswer: 'Temporary',
+          explanationFa: 'Temporary یعنی موقتی که در برابر Permanent (دائمی) قرار دارد.',
+          explanationEn: 'Temporary means lasting for only a limited period of time.',
+          category: 'vocabulary',
+          difficulty: 'elementary',
+        },
+        {
+          id: 'vq_7',
+          type: 'multiple-choice',
+          promptFa: 'معنی عبارت "Overwhelmed" چیست؟',
+          promptEn: 'When someone feels "Overwhelmed", they feel:',
+          options: ['Burdened with too much to handle', 'Completely relaxed and bored', 'Very hungry after exercise', 'Extremely wealthy'],
+          optionsFa: ['غرق در حجم بالای کار و استرس', 'کاملاً ریلکس و بی‌حوصله', 'بسیار گرسنه بعد از ورزش', 'بسیار ثروتمند و پولدار'],
+          correctAnswer: 'Burdened with too much to handle',
+          explanationFa: 'Overwhelmed یعنی غرق در کار یا احساسات سنگین به طوری که کنترل آن سخت باشد.',
+          explanationEn: 'Overwhelmed means overcome by superior force or an excessive amount of things to deal with.',
+          category: 'vocabulary',
+          difficulty: 'pre-intermediate',
+        },
+        {
+          id: 'vq_8',
+          type: 'multiple-choice',
+          promptFa: 'کدام کلمه به معنی "انعطاف‌پذیر و سازگار" است؟',
+          promptEn: 'Which word means able to change or be changed easily according to the situation?',
+          options: ['Flexible', 'Stubborn', 'Heavy', 'Fragile'],
+          optionsFa: ['انعطاف‌پذیر و سازگار', 'یک‌دنده و لجباز', 'سنگین و وزین', 'شکننده و ظریف'],
+          correctAnswer: 'Flexible',
+          explanationFa: 'Flexible هم برای اجسام فیزیکی منعطف و هم برای افراد سازگار با تغییرات به کار می‌رود.',
+          explanationEn: 'Flexible means adaptable to different circumstances or easily bent.',
+          category: 'vocabulary',
+          difficulty: 'beginner',
+        },
+        {
+          id: 'vq_9',
+          type: 'multiple-choice',
+          promptFa: 'معنی کلمه "Accomplish" چیست؟',
+          promptEn: 'What does "Accomplish" mean?',
+          options: ['به سرانجام رساندن و دست یافتن به هدف', 'از دست دادن فرصت شغلی', 'فرار کردن از مسئولیت', 'ترسیدن از تاریکی'],
+          optionsFa: ['To achieve or complete successfully', 'To lose a job chance', 'To escape responsibility', 'To fear the dark'],
+          correctAnswer: 'به سرانجام رساندن و دست یافتن به هدف',
+          explanationFa: 'Accomplish یعنی با موفقیت کاری را انجام دادن یا هدفی را فتح کردن.',
+          explanationEn: 'Accomplish means to achieve or complete something successfully.',
           category: 'vocabulary',
           difficulty: 'elementary',
         },
@@ -408,20 +523,22 @@ class Database {
 
     const grammarQuiz1: Quiz = {
       id: 'quiz_grammar_1',
-      titleFa: 'آزمون گرامر: زمان حال ساده و استمراری',
-      titleEn: 'Grammar: Present Simple vs. Continuous',
-      descriptionFa: 'تشخیص تفاوت کارهای روتین با فعالیت‌های در حال انجام همین الان',
-      descriptionEn: 'Master the distinction between daily routines and actions happening right now.',
+      titleFa: 'آزمون گرامر: زمان‌ها و ساختار جملات کاربردی',
+      titleEn: 'Grammar: Essential Tenses & Sentence Patterns',
+      descriptionFa: 'سنجش ۹ سوالی ساختار افعال، زمان حال استمراری، گذشته و حروف اضافه',
+      descriptionEn: 'Test your understanding of 9 essential grammar structures in daily English.',
       type: 'grammar',
       level: 'beginner',
-      xpReward: 50,
+      xpReward: 65,
+      timeLimitSeconds: 500,
       questions: [
         {
           id: 'gq_1',
           type: 'multiple-choice',
           promptFa: 'کدام گزینه با توجه به قید زمان "right now" صحیح است؟',
-          promptEn: 'Look! It _______ right now.',
+          promptEn: 'Look outside! It _______ right now.',
           options: ['is raining', 'rains', 'rained', 'rain'],
+          optionsFa: ['در حال باریدن است (استمراری)', 'باران می‌بارد (روتین حال)', 'باران بارید (گذشته)', 'فرم پایه بدون فاعل'],
           correctAnswer: 'is raining',
           explanationFa: 'برای کاری که همین الان در حال وقوع است از حال استمراری (is + verb-ing) استفاده می‌کنیم.',
           explanationEn: 'Present continuous is used for actions happening at the moment of speech.',
@@ -432,11 +549,339 @@ class Database {
           id: 'gq_2',
           type: 'multiple-choice',
           promptFa: 'شکل منفی جمله "He likes coffee" کدام است؟',
-          promptEn: 'What is the negative form of "He likes coffee"?',
+          promptEn: 'What is the correct negative form of "He likes coffee"?',
           options: ['He does not like coffee.', 'He is not like coffee.', 'He not likes coffee.', 'He do not likes coffee.'],
+          optionsFa: ['او قهوه دوست ندارد (صحیح)', 'استفاده نادرست از is not', 'قرار دادن منفی بدون کمکی', 'استفاده نادرست از do برای سوم‌شخص'],
           correctAnswer: 'He does not like coffee.',
           explanationFa: 'برای سوم شخص مفرد از does not استفاده می‌کنیم و فعل اصلی به حالت ساده (like) برمی‌گردد.',
           explanationEn: 'Negative present simple for he/she/it uses does not + base verb.',
+          category: 'grammar',
+          difficulty: 'beginner',
+        },
+        {
+          id: 'gq_3',
+          type: 'multiple-choice',
+          promptFa: 'کدام حرف اضافه برای بیان روزهای هفته استفاده می‌شود؟',
+          promptEn: 'We have an English lesson _______ Monday morning.',
+          options: ['on', 'in', 'at', 'by'],
+          optionsFa: ['در روز (حرف اضافه روزهای هفته)', 'در ماه/سال (نادرست)', 'در ساعت مشخص (نادرست)', 'تا قبل از (نادرست)'],
+          correctAnswer: 'on',
+          explanationFa: 'برای روزهای هفته (مانند Monday, Friday) همیشه از حرف اضافه on استفاده می‌شود.',
+          explanationEn: 'We use the preposition "on" for days of the week.',
+          category: 'grammar',
+          difficulty: 'beginner',
+        },
+        {
+          id: 'gq_4',
+          type: 'multiple-choice',
+          promptFa: 'کدام جمله از نظر کاربرد اسامی شمارش‌پذیر و غیرشمارش‌پذیر درست است؟',
+          promptEn: 'Which sentence correctly uses countable and uncountable quantifiers?',
+          options: ['How much water do you drink?', 'How many water do you drink?', 'How much books do you read?', 'How many money do you have?'],
+          optionsFa: ['چه مقدار آب می‌نوشید؟ (صحیح)', 'استفاده از many برای آب (نادرست)', 'استفاده از much برای کتاب (نادرست)', 'استفاده از many برای پول (نادرست)'],
+          correctAnswer: 'How much water do you drink?',
+          explanationFa: 'برای اسامی غیرقابل شمارش مثل water و money از how much و برای قابل شمارش‌ها از how many استفاده می‌شود.',
+          explanationEn: 'Use "how much" for uncountable nouns like water.',
+          category: 'grammar',
+          difficulty: 'elementary',
+        },
+        {
+          id: 'gq_5',
+          type: 'multiple-choice',
+          promptFa: 'شکل سوالی درست در زمان گذشته ساده برای جمله "They visited Paris" کدام است؟',
+          promptEn: 'Choose the correct question form for: "They visited Paris."',
+          options: ['Did they visit Paris?', 'Did they visited Paris?', 'Were they visit Paris?', 'Have they visit Paris?'],
+          optionsFa: ['آیا آنها پاریس را دیدند؟ (صحیح)', 'تکرار پسوند ed همراه با did (نادرست)', 'استفاده اشتباه از were', 'ساختار ناقص ماضی نقلی'],
+          correctAnswer: 'Did they visit Paris?',
+          explanationFa: 'وقتی در سوال از Did استفاده می‌کنیم، فعل اصلی باید به شکل پایه (visit) آورده شود.',
+          explanationEn: 'When using auxiliary "Did", the main verb reverts to base form.',
+          category: 'grammar',
+          difficulty: 'elementary',
+        },
+        {
+          id: 'gq_6',
+          type: 'multiple-choice',
+          promptFa: 'کدام گزینه برای بیان توانایی در زمان حال استفاده می‌شود؟',
+          promptEn: 'She _______ speak three languages fluently.',
+          options: ['can', 'could to', 'is can', 'canning'],
+          optionsFa: ['می‌تواند (فعل کمکی توانایی حال)', 'ساختار اشتباه گذشته با to', 'ترکیب نادرست با is', 'افزودن ing به فعل وجهی (غلط)'],
+          correctAnswer: 'can',
+          explanationFa: 'فعل کمکی can برای بیان توانایی حال استفاده می‌شود و بعد از آن فعل به شکل ساده می‌آید.',
+          explanationEn: 'Modal verb "can" expresses present ability followed by bare infinitive.',
+          category: 'grammar',
+          difficulty: 'beginner',
+        },
+        {
+          id: 'gq_7',
+          type: 'multiple-choice',
+          promptFa: 'کدام صفت عالی (Superlative) از نظر گرامری درست نوشته شده است؟',
+          promptEn: 'Mount Everest is _______ mountain in the world.',
+          options: ['the highest', 'highest', 'the most high', 'more higher'],
+          optionsFa: ['بلندترین (the + صفت تک‌سیلابی + est)', 'بدون حرف تعریف the (نادرست)', 'استفاده از most برای صفت کوتاه (غلط)', 'ترکیب اشتباه صفت تفضیلی مضاعف'],
+          correctAnswer: 'the highest',
+          explanationFa: 'برای صفات تک‌سیلابی در حالت عالی از the + adj + est استفاده می‌شود.',
+          explanationEn: 'Short adjectives form the superlative with the + -est.',
+          category: 'grammar',
+          difficulty: 'elementary',
+        },
+        {
+          id: 'gq_8',
+          type: 'multiple-choice',
+          promptFa: 'جمله زیر را با ضمیر مفعولی صحیح کامل کنید: "Give the keys to _______."',
+          promptEn: 'Give the keys to _______ when you arrive.',
+          options: ['me', 'I', 'my', 'mine'],
+          optionsFa: ['به من (ضمیر مفعولی)', 'من (ضمیر فاعلی)', 'مال من (صفت ملکی)', 'مال من (ضمیر ملکی)'],
+          correctAnswer: 'me',
+          explanationFa: 'بعد از حروف اضافه مثل to از ضمیر مفعولی (me, him, her, them) استفاده می‌کنیم.',
+          explanationEn: 'After prepositions like "to", use the object pronoun "me".',
+          category: 'grammar',
+          difficulty: 'beginner',
+        },
+        {
+          id: 'gq_9',
+          type: 'multiple-choice',
+          promptFa: 'کدام گزینه برای بیان تصمیم ناگهانی در لحظه مناسب است؟',
+          promptEn: 'The phone is ringing. I _______ answer it!',
+          options: ['will', 'am going to', 'am answering', 'was'],
+          optionsFa: ['پاسخ خواهم داد (تصمیم آنی)', 'برنامه‌ریزی از قبل داشته‌ام', 'در حال حاضر در حال پاسخ دادنم', 'زمان گذشته نامرتبط'],
+          correctAnswer: 'will',
+          explanationFa: 'برای تصمیماتی که در همان لحظه صحبت گرفته می‌شوند از will استفاده می‌کنیم.',
+          explanationEn: 'Use "will" for spontaneous decisions made at the moment of speaking.',
+          category: 'grammar',
+          difficulty: 'elementary',
+        },
+      ],
+    };
+
+    const situationalQuiz1: Quiz = {
+      id: 'quiz_situational_1',
+      titleFa: 'آزمون مکالمه: موقعیت‌های واقعی و اصطلاحات روزمره',
+      titleEn: 'Conversational English & Real-World Dialogues',
+      descriptionFa: 'سنجش ۸ سوالی واکنش‌های کاربردی در سفر، خرید، رستوران و روابط دوستانه',
+      descriptionEn: '8-question practical test measuring your real-world conversational readiness.',
+      type: 'mixed',
+      level: 'elementary',
+      xpReward: 55,
+      timeLimitSeconds: 420,
+      questions: [
+        {
+          id: 'sq_1',
+          type: 'multiple-choice',
+          promptFa: 'در رستوران، وقتی می‌خواهید صورت‌حساب را درخواست کنید کدام جمله مودبانه‌تر است؟',
+          promptEn: 'How do you politely ask for the bill at a restaurant?',
+          options: ['Could we have the check, please?', 'Give me the money now!', 'I want to pay quickly.', 'Where is the food price?'],
+          optionsFa: ['ممکن است لطفاً صورت‌حساب را بیاورید؟', 'همین الان پول را به من بده!', 'من می‌خواهم سریع حساب کنم.', 'قیمت غذا کجاست؟'],
+          correctAnswer: 'Could we have the check, please?',
+          explanationFa: 'در انگلیسی استاندارد و مودبانه از عبارت "Could we have the check/bill, please?" استفاده می‌شود.',
+          explanationEn: 'Polite restaurant request uses "Could we have the check/bill, please?".',
+          category: 'reading',
+          difficulty: 'beginner',
+        },
+        {
+          id: 'sq_2',
+          type: 'multiple-choice',
+          promptFa: 'پاسخ مودبانه به جمله "Thank you very much for your help!" چیست؟',
+          promptEn: 'What is the natural and polite response to: "Thank you very much for your help!"?',
+          options: ["You're very welcome!", "No need to talk.", "Why did you say that?", "It is my problem."],
+          optionsFa: ['خواهش می‌کنم / قدمتان روی چشم!', 'نیازی به حرف زدن نیست.', 'چرا این حرف را زدید؟', 'این مشکل خود من است.'],
+          correctAnswer: "You're very welcome!",
+          explanationFa: 'پاسخ استاندارد و مودبانه به تشکر "You\'re welcome" یا "You\'re very welcome" است.',
+          explanationEn: 'Standard polite reply to thank you is "You are welcome".',
+          category: 'reading',
+          difficulty: 'beginner',
+        },
+        {
+          id: 'sq_3',
+          type: 'multiple-choice',
+          promptFa: 'در فرودگاه، عبارت "Boarding pass" به چه معناست؟',
+          promptEn: 'What is a "Boarding pass" at the airport?',
+          options: ['کارت پرواز برای سوار شدن به هواپیما', 'گذرنامه بین‌المللی', 'برچسب چمدان بار', 'رسید پرداخت عوارض خروج'],
+          optionsFa: ['The flight boarding ticket document', 'International passport', 'Luggage luggage tag', 'Exit tax receipt'],
+          correctAnswer: 'کارت پرواز برای سوار شدن به هواپیما',
+          explanationFa: 'Boarding pass همان کارت ورود به هواپیما است که گیت و شماره صندلی روی آن درج شده است.',
+          explanationEn: 'A boarding pass is a document provided by an airline during check-in.',
+          category: 'vocabulary',
+          difficulty: 'beginner',
+        },
+        {
+          id: 'sq_4',
+          type: 'multiple-choice',
+          promptFa: 'اگر متوجه منظور کسی نشدید، مودبانه‌ترین راه برای درخواست تکرار چیست؟',
+          promptEn: 'What is the most polite way to ask someone to repeat what they said?',
+          options: ['Pardon me, could you repeat that?', 'What?! Speak louder!', 'I did not listen to you.', 'Repeat now!'],
+          optionsFa: ['ببخشید، ممکن است لطفاً تکرار بفرمایید؟', 'چی؟! بلندتر حرف بزن!', 'من بهت گوش ندادم.', 'همین الان تکرار کن!'],
+          correctAnswer: 'Pardon me, could you repeat that?',
+          explanationFa: 'عبارت Pardon me یا Could you repeat that please مودبانه‌ترین شیوه است.',
+          explanationEn: 'Pardon me, could you repeat that? is the standard polite clarification phrasing.',
+          category: 'reading',
+          difficulty: 'beginner',
+        },
+        {
+          id: 'sq_5',
+          type: 'multiple-choice',
+          promptFa: 'اصطلاح "Under the weather" یعنی چه؟',
+          promptEn: 'If someone says "I am feeling under the weather today", it means:',
+          options: ['کمی ناخوش‌احوال و بیمارم', 'هوا بارانی است', 'زیر چتر ایستاده‌ام', 'خیلی خوشحالم'],
+          optionsFa: ['Feeling slightly sick or unwell', 'The weather is rainy', 'Standing under an umbrella', 'Extremely cheerful'],
+          correctAnswer: 'کمی ناخوش‌احوال و بیمارم',
+          explanationFa: 'Under the weather یعنی فرد کمی کسالت یا سرماخوردگی خفیف دارد.',
+          explanationEn: 'Under the weather is an idiom meaning slightly indisposed or unwell.',
+          category: 'mixed',
+          difficulty: 'elementary',
+        },
+        {
+          id: 'sq_6',
+          type: 'multiple-choice',
+          promptFa: 'وقتی دوستی می‌گوید "Let’s call it a day!" منظورش چیست؟',
+          promptEn: 'What does "Let’s call it a day!" mean after a long work session?',
+          options: ['بیایید کار امروز را تمام کنیم و به خانه برویم', 'بیایید نام امروز را تغییر دهیم', 'تا فردا صبح ادامه دهیم', 'امروز روز تعطیل است'],
+          optionsFa: ['Stop working for the rest of the day', 'Change today name', 'Work until tomorrow morning', 'Today is a public holiday'],
+          correctAnswer: 'بیایید کار امروز را تمام کنیم و به خانه برویم',
+          explanationFa: 'Call it a day یعنی متوقف کردن کار برای ادامه در روز بعد.',
+          explanationEn: 'Call it a day means to stop what you are doing because you have done enough.',
+          category: 'mixed',
+          difficulty: 'elementary',
+        },
+        {
+          id: 'sq_7',
+          type: 'multiple-choice',
+          promptFa: 'کدام عبارت برای معرفی مودبانه یک همکار در جمع مناسب است؟',
+          promptEn: 'Which phrase is best to politely introduce your colleague?',
+          options: ["I'd like you to meet my colleague, Sara.", 'Look at this person here.', 'This is Sara, say hi.', 'Sara is here now.'],
+          optionsFa: ['مایلم شما را با همکارم سارا آشنا کنم.', 'به این شخص اینجا نگاه کنید.', 'این ساراست، سلام کنید.', 'سارا الان اینجاست.'],
+          correctAnswer: "I'd like you to meet my colleague, Sara.",
+          explanationFa: 'فرمول استاندارد معرفی رسمی "I\'d like you to meet..." است.',
+          explanationEn: 'Formal polite introductions use "I would like you to meet...".',
+          category: 'reading',
+          difficulty: 'elementary',
+        },
+        {
+          id: 'sq_8',
+          type: 'multiple-choice',
+          promptFa: 'در خرید، وقتی می‌خواهید لباس را در اتاق پرو امتحان کنید می‌گویید:',
+          promptEn: 'In a clothing store, how do you ask to try on a shirt?',
+          options: ['Can I try this shirt on?', 'Can I test this shirt?', 'Can I wear this home?', 'Can I practice this shirt?'],
+          optionsFa: ['آیا می‌توانم این پیراهن را پرو کنم؟', 'آیا می‌توانم این پیراهن را تست کنم؟ (نادرست)', 'آیا می‌توانم این را خانه بپوشم؟', 'آیا می‌توانم این پیراهن را تمرین کنم؟'],
+          correctAnswer: 'Can I try this shirt on?',
+          explanationFa: 'فعل مرکب برای پرو کردن لباس "try on" است.',
+          explanationEn: 'The phrasal verb to test clothing fit is "try on".',
+          category: 'vocabulary',
+          difficulty: 'beginner',
+        },
+      ],
+    };
+
+    const mistakesQuiz1: Quiz = {
+      id: 'quiz_mistakes_1',
+      titleFa: 'آزمون خطاهای رایج فارسی‌زبانان در انگلیسی',
+      titleEn: 'Common Pitfalls & Mistakes for Persian Learners',
+      descriptionFa: 'سنجش ۸ سوالی چالش‌های پرکاربرد تداخل زبان مادری با ساختارهای انگلیسی',
+      descriptionEn: '8-question targeted test identifying frequent mother-tongue interference errors.',
+      type: 'grammar',
+      level: 'elementary',
+      xpReward: 60,
+      timeLimitSeconds: 450,
+      questions: [
+        {
+          id: 'mq_1',
+          type: 'multiple-choice',
+          promptFa: 'برای سوار شدن به تاکسی کدام عبارت صحیح است؟',
+          promptEn: 'Which preposition is correct for getting inside a taxi?',
+          options: ['Get in the taxi', 'Get on the taxi', 'Get at the taxi', 'Get into top of taxi'],
+          optionsFa: ['سوار تاکسی شدن (صحیح با in)', 'سوار تاکسی شدن (غلط با on)', 'در کنار تاکسی بودن', 'روی سقف تاکسی رفتن'],
+          correctAnswer: 'Get in the taxi',
+          explanationFa: 'برای وسایل نقلیه کوچک که نمی‌توان داخلشان ایستاد (car, taxi) از get in و برای وسایل بزرگ (bus, train, plane) از get on استفاده می‌شود.',
+          explanationEn: 'Use "get in" for cars/taxis and "get on" for buses/trains/planes.',
+          category: 'grammar',
+          difficulty: 'elementary',
+        },
+        {
+          id: 'mq_2',
+          type: 'multiple-choice',
+          promptFa: 'کدام عبارت برای بیان سن از نظر گرامری درست است؟',
+          promptEn: 'Which sentence correctly states your age?',
+          options: ['I am 25 years old.', 'I have 25 years old.', 'My age has 25.', 'I am having 25 years.'],
+          optionsFa: ['من ۲۵ سال دارم (ساختار درست با to be)', 'ترجمه کلمه به کلمه از فارسی با have (غلط)', 'ساختار نامفهوم', 'استفاده از حال استمراری (غلط)'],
+          correctAnswer: 'I am 25 years old.',
+          explanationFa: 'در انگلیسی سن با فعل to be بیان می‌شود (I am ... years old)، برعکس فارسی و فرانسه که از "داشتن" استفاده می‌شود.',
+          explanationEn: 'English expresses age using the verb "to be", never "to have".',
+          category: 'grammar',
+          difficulty: 'beginner',
+        },
+        {
+          id: 'mq_3',
+          type: 'multiple-choice',
+          promptFa: 'جمله "من با تو ازدواج کردم" به انگلیسی چگونه ترجمه می‌شود؟',
+          promptEn: 'What is the correct English translation of marrying someone?',
+          options: ['She married him.', 'She married with him.', 'She is marry to him.', 'She got married with him.'],
+          optionsFa: ['او با او ازدواج کرد (فعل مستقیم بدون with)', 'استفاده نادرست از with به تقلید از فارسی', 'گرامر ناقص', 'استفاده نادرست از with'],
+          correctAnswer: 'She married him.',
+          explanationFa: 'فعل marry متعدی است و نیازی به حرف اضافه with ندارد: She married John یا She is married to John.',
+          explanationEn: 'Marry is transitive: "marry someone", or "be married to someone", never "married with".',
+          category: 'grammar',
+          difficulty: 'elementary',
+        },
+        {
+          id: 'mq_4',
+          type: 'multiple-choice',
+          promptFa: 'برای توضیح دادن چیزی به کسی کدام ساختار صحیح است؟',
+          promptEn: 'Choose the correct structure for explaining something to someone:',
+          options: ['Explain this to me, please.', 'Explain me this, please.', 'Explain for me this.', 'Explain at me.'],
+          optionsFa: ['این را به من توضیح دهید (صحیح با to)', 'استفاده مستقیم بدون to (نادرست)', 'استفاده از for به تقلید از فارسی (غلط)', 'حرف اضافه نامربوط'],
+          correctAnswer: 'Explain this to me, please.',
+          explanationFa: 'فعل explain ساختار "explain something to someone" دارد و نمی‌توان گفت "explain me".',
+          explanationEn: 'We say "explain something to someone", not "explain someone something".',
+          category: 'grammar',
+          difficulty: 'elementary',
+        },
+        {
+          id: 'mq_5',
+          type: 'multiple-choice',
+          promptFa: 'کدام گزینه برای بیان شرکت در آزمون درست است؟',
+          promptEn: 'How do you say "I had an exam today"?',
+          options: ['I took an exam today.', 'I gave an exam today as a student.', 'I did an exam today.', 'I made an exam.'],
+          optionsFa: ['امتحان دادم (دانش‌آموز take exam می‌کند)', 'استفاده از give (که مخصوص معلم است)', 'استفاده نادرست از do', 'استفاده از make'],
+          correctAnswer: 'I took an exam today.',
+          explanationFa: 'دانش‌آموز امتحان را take می‌کند (شرکت می‌کند)، در حالی که استاد امتحان را give می‌کند (برگزار می‌کند).',
+          explanationEn: 'Students "take" or "sit" an exam; teachers "give" an exam.',
+          category: 'vocabulary',
+          difficulty: 'elementary',
+        },
+        {
+          id: 'mq_6',
+          type: 'multiple-choice',
+          promptFa: 'کدام کلمه به معنی اطلاعات اسم غیرقابل شمارش است و جمع بسته نمی‌شود؟',
+          promptEn: 'Which sentence is grammatically correct regarding information?',
+          options: ['He gave me useful information.', 'He gave me useful informations.', 'He gave me an information.', 'He gave me many informations.'],
+          optionsFa: ['او اطلاعات مفیدی به من داد (صحیح)', 'جمع بستن information با s (غلط)', 'آوردن an قبل از اسم غیرشمارش (غلط)', 'استفاده از many informations (غلط)'],
+          correctAnswer: 'He gave me useful information.',
+          explanationFa: 'واژه Information غیرقابل شمارش است و هرگز s جمع نمی‌گیرد و an دریافت نمی‌کند.',
+          explanationEn: 'Information is uncountable in English and never takes a plural "s".',
+          category: 'grammar',
+          difficulty: 'elementary',
+        },
+        {
+          id: 'mq_7',
+          type: 'multiple-choice',
+          promptFa: 'برای باز کردن چراغ یا تلویزیون از کدام فعل استفاده می‌شود؟',
+          promptEn: 'How do you tell someone to turn on the light?',
+          options: ['Turn on the light', 'Open the light', 'Close the light', 'Do the light on'],
+          optionsFa: ['چراغ را روشن کن (صحیح)', 'ترجمه کلمه‌به‌کلمه از فارسی "باز کردن چراغ" (غلط)', 'خاموش کردن چراغ با close (غلط)', 'ساختار نامفهوم'],
+          correctAnswer: 'Turn on the light',
+          explanationFa: 'برای وسایل برقی از turn on / turn off استفاده می‌شود نه open / close.',
+          explanationEn: 'Use "turn on / switch on" for electrical devices, never "open the light".',
+          category: 'vocabulary',
+          difficulty: 'beginner',
+        },
+        {
+          id: 'mq_8',
+          type: 'multiple-choice',
+          promptFa: 'کدام گزینه ساختار درست برای "من به او زنگ زدم" است؟',
+          promptEn: 'How do you say you telephoned someone?',
+          options: ['I called him yesterday.', 'I called to him yesterday.', 'I made a phone with him.', 'I called with him.'],
+          optionsFa: ['من دیروز به او زنگ زدم (بدون حرف اضافه)', 'استفاده نادرست از to', 'ترجمه تحت‌اللفظی', 'استفاده نادرست از with'],
+          correctAnswer: 'I called him yesterday.',
+          explanationFa: 'فعل call نیازی به حرف اضافه to ندارد (I called him).',
+          explanationEn: 'Call does not take a preposition: "call someone", not "call to someone".',
           category: 'grammar',
           difficulty: 'beginner',
         },
@@ -446,6 +891,8 @@ class Database {
     this.quizzes.set(placementQuiz.id, placementQuiz);
     this.quizzes.set(vocabQuiz1.id, vocabQuiz1);
     this.quizzes.set(grammarQuiz1.id, grammarQuiz1);
+    this.quizzes.set(situationalQuiz1.id, situationalQuiz1);
+    this.quizzes.set(mistakesQuiz1.id, mistakesQuiz1);
 
     // 4. AI Conversation Scenarios
     const initialScenarios: AIConversationScenario[] = [
@@ -530,7 +977,7 @@ class Database {
 
     initialScenarios.forEach((s) => this.scenarios.set(s.id, s));
 
-    // 5. Community Rooms & Initial Posts
+    // 5. Community Rooms (Initialized with 0 posts)
     const rooms: CommunityRoom[] = [
       {
         id: 'room_lounge',
@@ -541,7 +988,7 @@ class Database {
         descriptionFa: 'گفتگوی آزاد، احوالپرسی، انگیزه‌بخشی و اشتراک مطالب جذاب به زبان انگلیسی و فارسی.',
         icon: 'coffee',
         isPublic: true,
-        postCount: 12,
+        postCount: 0,
         color: 'sky',
       },
       {
@@ -553,7 +1000,7 @@ class Database {
         descriptionFa: 'پرسش و پاسخ درباره معنی لغات، اصطلاحات روزمره و روش‌های به‌خاطرسپاری.',
         icon: 'book-open',
         isPublic: false,
-        postCount: 8,
+        postCount: 0,
         color: 'amber',
       },
       {
@@ -565,7 +1012,7 @@ class Database {
         descriptionFa: 'اشکالات گرامری، زمان‌ها، حروف اضافه و ساختار جملات را بپرسید.',
         icon: 'pen-tool',
         isPublic: false,
-        postCount: 6,
+        postCount: 0,
         color: 'emerald',
       },
       {
@@ -577,7 +1024,7 @@ class Database {
         descriptionFa: 'تبادل جملات مکالمه، تمرین تلفظ و یافتن پارتنر برای گفتگو.',
         icon: 'mic',
         isPublic: false,
-        postCount: 9,
+        postCount: 0,
         color: 'rose',
       },
       {
@@ -589,7 +1036,7 @@ class Database {
         descriptionFa: 'محیطی امن برای رفع اشکال سوالات کتاب‌های درسی پایه هفتم تا دوازدهم و کنکور.',
         icon: 'help-circle',
         isPublic: false,
-        postCount: 5,
+        postCount: 0,
         color: 'indigo',
       },
       {
@@ -601,83 +1048,182 @@ class Database {
         descriptionFa: 'تحلیل دیالوگ‌های معروف فیلم‌ها و انیمیشن‌ها و اصطلاحات عامیانه.',
         icon: 'film',
         isPublic: false,
-        postCount: 7,
+        postCount: 0,
         color: 'purple',
       },
     ];
 
     rooms.forEach((r) => this.communityRooms.set(r.id, r));
 
-    // Initial Community Posts
-    const p1: CommunityPost = {
-      id: 'post_1',
-      roomId: 'room_lounge',
-      authorId: 'usr_demo_1',
-      authorName: 'مهنا کریمی',
-      authorLevel: 'beginner',
-      title: 'سلام به همه بچه‌ها! چطور روزانه لغات انگلیسی رو مرور می‌کنید؟',
-      content:
-        'سلام دوستان! من تازه یادگیری رو با این اپ شروع کردم. شما چطور برنامه‌ریزی می‌کنید که روزی ۵ تا لغت رو فراموش نکنید؟ من لغات رو با مثال و صدای تلفظ گوش میدم و خیلی کمک کرده.',
-      tags: ['StudyTips', 'Vocabulary', 'Routine'],
-      likes: 8,
-      commentsCount: 2,
-      isPinned: true,
-      createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-      comments: [
-        {
-          id: 'comm_1',
-          postId: 'post_1',
-          authorId: 'usr_admin_1',
-          authorName: 'مدیر آموزشی مهنا',
-          authorLevel: 'pre-intermediate',
-          content:
-            'سلام مهنا جان! آفرین به پشتکارت. بهترین روش اینه که با هر لغت یک جمله شخصی درباره روزمره‌ات بسازی و با دستیار هوش مصنوعی همون لغت رو تمرین کنی.',
-          createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-          likes: 5,
-        },
-        {
-          id: 'comm_2',
-          postId: 'post_1',
-          authorId: 'usr_sarah',
-          authorName: 'سارا رضایی',
-          authorLevel: 'elementary',
-          content: 'منم هر شب قبل خواب بخش لغات نشان‌شده (Saved Words) رو یک دور مرور می‌کنم، واقعاً نتیجه میده!',
-          createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-          likes: 3,
-        },
-      ],
-    };
+    // Community Discussions start completely empty without any seed posts (this.communityPosts is empty)
 
-    const p2: CommunityPost = {
-      id: 'post_2',
-      roomId: 'room_vocab',
-      authorId: 'usr_ali',
-      authorName: 'علی محمدی',
-      authorLevel: 'elementary',
-      title: 'فرق بین Remember و Remind چیه دقیقا؟',
-      content:
-        'سلام! همیشه این دو تا رو قاطی می‌کنم. مثلاً چطور بگیم "به من یادآوری کن"؟ میشه یه توضیح ساده بدید؟ ممنون!',
-      tags: ['Grammar', 'CommonMistakes', 'Vocabulary'],
-      likes: 6,
-      commentsCount: 1,
-      createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
-      comments: [
-        {
-          id: 'comm_3',
-          postId: 'post_2',
-          authorId: 'usr_admin_1',
-          authorName: 'مدیر آموزشی مهنا',
-          authorLevel: 'pre-intermediate',
-          content:
-            'سلام علی عزیز! خیلی نکته خوبیه:\n- فعل Remember یعنی خودت چیزی رو به یاد بیاری (I remember you).\n- فعل Remind یعنی کسی یا چیزی باعث بشه یادت بیفته: Remind me to call him (به من یادآوری کن بهش زنگ بزنم).',
-          createdAt: new Date(Date.now() - 3600000 * 8).toISOString(),
-          likes: 7,
-        },
-      ],
-    };
+    // Initial Community Expressions & Idioms
+    const expressionsList: CommunityExpression[] = [
+      {
+        id: 'exp_1',
+        english: 'Piece of cake',
+        persian: 'مثل آب خوردن، خیلی راحت و بی‌دردسر',
+        pronunciation: 'piːs əv keɪk',
+        exampleEn: 'Do not worry about the English placement test, it is a piece of cake!',
+        exampleFa: 'اصلاً نگران آزمون تعیین سطح انگلیسی نباش، مثل آب خوردنه!',
+        usageNoteFa: 'یکی از متداول‌ترین اصطلاحات عامیانه زبان انگلیسی برای کارهای بسیار ساده.',
+        category: 'idiom',
+        difficulty: 'beginner',
+        likes: 18,
+        submittedBy: 'مهنا کریمی',
+        createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+      },
+      {
+        id: 'exp_2',
+        english: 'Break a leg',
+        persian: 'موفق باشی! (به امید درخشش در اجرا)',
+        pronunciation: 'breɪk ə leɡ',
+        exampleEn: 'You have your presentation today? Break a leg!',
+        exampleFa: 'امروز ارائه‌ت هست؟ آرزوی موفقیت و درخشش دارم برات!',
+        usageNoteFa: 'این اصطلاح در تئاتر و موقعیت‌های مهم برای آرزوی موفقیت استفاده می‌شود و معنی تحت‌اللفظی ندارد.',
+        category: 'idiom',
+        difficulty: 'beginner',
+        likes: 24,
+        submittedBy: 'سارا رضایی',
+        createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+      },
+      {
+        id: 'exp_3',
+        english: 'Hit the books',
+        persian: 'بکوب درس خواندن، شروع جدی مطالعه',
+        pronunciation: 'hɪt ðə bʊks',
+        exampleEn: 'Final exams are next week, I really need to hit the books tonight.',
+        exampleFa: 'امتحانات نهایی هفته آینده‌ست، امشب باید حسابی بکوب درس بخونم.',
+        usageNoteFa: 'عبارت عامیانه در میان دانشجویان و دانش‌آموزان.',
+        category: 'slang',
+        difficulty: 'beginner',
+        likes: 14,
+        submittedBy: 'علی محمدی',
+        createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+      },
+      {
+        id: 'exp_4',
+        english: 'Under the weather',
+        persian: 'ناخوش‌احوال، کسل، کمی سرماخورده',
+        pronunciation: 'ˈʌndər ðə ˈwɛðər',
+        exampleEn: 'I feel a bit under the weather today, so I will stay home and rest.',
+        exampleFa: 'امروز کمی احساس کسالت و ناخوشی می‌کنم، پس خونه می‌مونم و استراحت می‌کنم.',
+        usageNoteFa: 'زمانی استفاده می‌شود که فرد بیماری سختی ندارد اما کمی بی‌حال یا سرماخورده است.',
+        category: 'idiom',
+        difficulty: 'intermediate',
+        likes: 16,
+        submittedBy: 'مدیر آموزشی مهنا',
+        createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+      },
+      {
+        id: 'exp_5',
+        english: 'Look forward to',
+        persian: 'بی‌صبرانه مشتاق و منتظر چیزی بودن',
+        pronunciation: 'lʊk ˈfɔːrwərd tuː',
+        exampleEn: 'I am looking forward to seeing you this weekend.',
+        exampleFa: 'بی‌صبرانه مشتاق دیدارت در این تعطیلات آخر هفته هستم.',
+        usageNoteFa: 'نکته طلایی: بعد از to در این اصطلاح حتماً باید فعل ingدار (gerund) یا اسم بیاید.',
+        category: 'phrasal_verb',
+        difficulty: 'intermediate',
+        likes: 29,
+        submittedBy: 'مدیر آموزشی مهنا',
+        createdAt: new Date(Date.now() - 86400000 * 6).toISOString(),
+      },
+      {
+        id: 'exp_6',
+        english: 'Call it a day',
+        persian: 'کار را برای امروز تمام کردن، دست از کار کشیدن',
+        pronunciation: 'kɔːl ɪt ə deɪ',
+        exampleEn: 'We have been practicing for four hours, let\'s call it a day.',
+        exampleFa: 'چهار ساعت مداوم تمرین کرده‌ایم، بیایید برای امروز کار را تمام کنیم.',
+        usageNoteFa: 'معمولاً در پایان شیفت کاری یا پایان یک جلسه تمرینی برای اعلام پایان کار گفته می‌شود.',
+        category: 'daily',
+        difficulty: 'beginner',
+        likes: 12,
+        submittedBy: 'مهنا کریمی',
+        createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+      },
+    ];
 
-    this.communityPosts.set(p1.id, p1);
-    this.communityPosts.set(p2.id, p2);
+    expressionsList.forEach((exp) => this.communityExpressions.set(exp.id, exp));
+
+    // Initial Grammar Tips & Common Persian Learner Mistakes
+    const grammarTipsList: GrammarHelpTip[] = [
+      {
+        id: 'gtip_1',
+        titleFa: 'استفاده نادرست از فعل To Be با Agree',
+        incorrectExample: 'I am agree with your opinion.',
+        correctExample: 'I agree with your opinion.',
+        explanationFa: 'واژه Agree در زبان انگلیسی خودش فعل است (verb)، نه صفت. بنابراین نیازی به فعل am/is/are ندارد.',
+        persianContext: 'چون در فارسی می‌گوییم "من موافقم"، زبان‌آموزان به اشتباه آن را با am ترجمه می‌کنند.',
+        difficulty: 'beginner',
+        likes: 31,
+        category: 'sentence_structure',
+        createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+      },
+      {
+        id: 'gtip_2',
+        titleFa: 'حرف اضافه زنگ زدن و تماس تلفنی',
+        incorrectExample: 'I will call to you tonight.',
+        correctExample: 'I will call you tonight.',
+        explanationFa: 'فعل Call مفعول مستقیم می‌گیرد و هیچگاه با حرف اضافه to به کار نمی‌رود (Call someone).',
+        persianContext: 'در زبان فارسی می‌گوییم "به او زنگ زدم" که باعث ورود اشتباه to به جمله انگلیسی می‌شود.',
+        difficulty: 'beginner',
+        likes: 27,
+        category: 'prepositions',
+        createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+      },
+      {
+        id: 'gtip_3',
+        titleFa: 'جمع بستن اسم غیرقابل شمارش Information',
+        incorrectExample: 'The teacher gave us many useful informations.',
+        correctExample: 'The teacher gave us a lot of useful information.',
+        explanationFa: 'کلمه Information غیرقابل شمارش (uncountable) است؛ هرگز s جمع نمی‌گیرد و کلمه many یا an به صورت مستقیم قبل از آن نمی‌آید.',
+        persianContext: 'در فارسی "اطلاعات" کلمه‌ای جمع است، اما در انگلیسی Information همیشه مفرد لحاظ می‌شود.',
+        difficulty: 'beginner',
+        likes: 35,
+        category: 'common_mistakes',
+        createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+      },
+      {
+        id: 'gtip_4',
+        titleFa: 'حرف اضافه فعل گوش دادن (Listen)',
+        incorrectExample: 'I love listening English podcasts.',
+        correctExample: 'I love listening to English podcasts.',
+        explanationFa: 'هرگاه بعد از فعل listen مفعول داشته باشیم، حتماً حرف اضافه to الزامی است (Listen to music/podcasts).',
+        persianContext: 'در فارسی می‌گوییم "پادکست گوش میدم" و حرف اضافه نداریم، اما در انگلیسی listen حتماً to می‌خواهد.',
+        difficulty: 'beginner',
+        likes: 22,
+        category: 'prepositions',
+        createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+      },
+      {
+        id: 'gtip_5',
+        titleFa: 'تفاوت گذشته ساده و حال کامل با قید زمان مشخص',
+        incorrectExample: 'I have seen my friend yesterday.',
+        correctExample: 'I saw my friend yesterday.',
+        explanationFa: 'با قیدهای زمان مشخص در گذشته مانند yesterday، last night یا two days ago همیشه از گذشته ساده (Simple Past) استفاده می‌شود، نه حال کامل (Present Perfect).',
+        persianContext: 'استفاده اشتباه از "دیده‌ام" به جای "دیدم" زمانی که زمان گذشته مشخص است.',
+        difficulty: 'elementary',
+        likes: 19,
+        category: 'tenses',
+        createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+      },
+      {
+        id: 'gtip_6',
+        titleFa: 'حرف اضافه جستجو در اینترنت',
+        incorrectExample: 'I searched it in internet.',
+        correctExample: 'I searched it on the internet.',
+        explanationFa: 'برای صفحات وب، رسانه‌ها و بستر اینترنت همواره از حرف اضافه on the internet استفاده می‌شود.',
+        persianContext: 'ترجمه تحت‌اللفظی "در اینترنت" به in internet یکی از خطاهای متداول است.',
+        difficulty: 'beginner',
+        likes: 15,
+        category: 'prepositions',
+        createdAt: new Date(Date.now() - 86400000 * 6).toISOString(),
+      },
+    ];
+
+    grammarTipsList.forEach((tip) => this.grammarHelpTips.set(tip.id, tip));
 
     // 6. Video Lessons (Movies & Animations)
     const v1: VideoContent = {
@@ -768,20 +1314,19 @@ class Database {
     this.videoLessons.set(v1.id, v1);
     this.videoLessons.set(v2.id, v2);
 
-    // 7. Achievements
+    // 7. Achievements (All start locked from zero)
     const defaultAchievements: Achievement[] = [
       {
         id: 'ach_first_quiz',
         code: 'FIRST_QUIZ',
         titleFa: 'قدم اول قهرمان 🏅',
         titleEn: 'First Quiz Completed',
-        descriptionFa: 'اولین کوئیز خود را با موفقیت پشت سر گذاشتید.',
-        descriptionEn: 'Successfully completed your first English quiz.',
+        descriptionFa: 'اولین کوئیز خود را با موفقیت پشت سر بگذارید.',
+        descriptionEn: 'Successfully complete your first English quiz.',
         icon: 'award',
         targetCount: 1,
-        currentCount: 1,
-        unlocked: true,
-        unlockedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+        currentCount: 0,
+        unlocked: false,
         xpReward: 50,
       },
       {
@@ -789,11 +1334,11 @@ class Database {
         code: '7_DAY_STREAK',
         titleFa: 'استمرار طلایی (۷ روز پیاپی) 🔥',
         titleEn: '7-Day Streak Master',
-        descriptionFa: '۷ روز پشت سر هم تمرین روزانه را انجام دادید.',
-        descriptionEn: 'Practiced English for 7 consecutive days.',
+        descriptionFa: '۷ روز پشت سر هم تمرین روزانه را انجام دهید.',
+        descriptionEn: 'Practice English for 7 consecutive days.',
         icon: 'flame',
         targetCount: 7,
-        currentCount: 4,
+        currentCount: 0,
         unlocked: false,
         xpReward: 100,
       },
@@ -802,11 +1347,11 @@ class Database {
         code: '100_WORDS',
         titleFa: 'گنجینه واژگان (۱۰۰ لغت) 📚',
         titleEn: 'Vocabulary Master',
-        descriptionFa: '۱۰۰ کلمه جدید انگلیسی را یاد گرفتید.',
-        descriptionEn: 'Learned and practiced 100 new English vocabulary words.',
+        descriptionFa: '۱۰۰ کلمه جدید انگلیسی را یاد بگیرید.',
+        descriptionEn: 'Learn and practice 100 new English vocabulary words.',
         icon: 'book-open',
         targetCount: 100,
-        currentCount: 14,
+        currentCount: 0,
         unlocked: false,
         xpReward: 150,
       },
@@ -815,48 +1360,20 @@ class Database {
         code: 'FIRST_AI_CHAT',
         titleFa: 'دوست هوش مصنوعی 🤖',
         titleEn: 'First AI Conversation',
-        descriptionFa: 'اولین گفتگوی تمرینی خود را با مهنا به پایان رساندید.',
-        descriptionEn: 'Completed your first conversational practice with Mohanna AI.',
+        descriptionFa: 'اولین گفتگوی تمرینی خود را با مهنا به پایان برسانید.',
+        descriptionEn: 'Complete your first conversational practice with Mohanna AI.',
         icon: 'bot',
         targetCount: 1,
-        currentCount: 1,
-        unlocked: true,
-        unlockedAt: new Date(Date.now() - 86400000).toISOString(),
+        currentCount: 0,
+        unlocked: false,
         xpReward: 60,
       },
     ];
 
     this.achievements.set(demoUser.id, defaultAchievements);
 
-    // 8. Notifications
-    const demoNotifications: AppNotification[] = [
-      {
-        id: 'notif_1',
-        userId: demoUser.id,
-        type: 'daily_reminder',
-        titleFa: 'وقت یادگیری امروزه! 🌟',
-        titleEn: "Time for Today's English!",
-        messageFa: 'فقط ۵ دقیقه تمرین کافیه تا زنجیره ۴ روزه‌ات حفظ بشه. لغات جدید منتظرتن!',
-        messageEn: 'Just 5 minutes of practice keeps your 4-day streak alive!',
-        read: false,
-        createdAt: new Date().toISOString(),
-        actionUrl: '/learn',
-      },
-      {
-        id: 'notif_2',
-        userId: demoUser.id,
-        type: 'achievement',
-        titleFa: 'مدال جدید باز شد! 🏆',
-        titleEn: 'New Badge Unlocked!',
-        messageFa: 'تبریک! دستاورد "دوست هوش مصنوعی" را دریافت کردید (+۶۰ XP).',
-        messageEn: 'Congrats! You unlocked the "First AI Conversation" badge (+60 XP).',
-        read: true,
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-        actionUrl: '/profile',
-      },
-    ];
-
-    this.notifications.set(demoUser.id, demoNotifications);
+    // 8. Notifications (Clean initial state)
+    this.notifications.set(demoUser.id, []);
   }
 
   // User management
@@ -883,9 +1400,9 @@ class Database {
       englishLevel: userData.englishLevel || 'beginner',
       learningGoal: userData.learningGoal || 'general',
       role: userData.role || 'user',
-      xp: 50, // Welcome XP bonus
-      streak: 1,
-      lastActiveDate: now.split('T')[0],
+      xp: 0,
+      streak: 0,
+      lastActiveDate: '',
       createdAt: now,
     };
 
@@ -917,7 +1434,7 @@ class Database {
         descriptionEn: 'Practice English for 7 consecutive days.',
         icon: 'flame',
         targetCount: 7,
-        currentCount: 1,
+        currentCount: 0,
         unlocked: false,
         xpReward: 100,
       },
@@ -949,8 +1466,33 @@ class Database {
       },
     ]);
 
-    const { passwordHash, ...safeUser } = newUser;
-    return safeUser;
+    return this.getUserById(id)!;
+  }
+
+  resetUserProgress(userId: string): User | undefined {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    user.xp = 0;
+    user.streak = 0;
+    user.lastActiveDate = '';
+    this.users.set(userId, user);
+
+    this.savedWords.set(userId, []);
+    this.learnedWords.set(userId, new Set());
+    this.quizResults.set(userId, []);
+    this.notifications.set(userId, []);
+
+    // Reset achievements
+    const achs = this.achievements.get(userId) || [];
+    const resetAchs = achs.map((a) => ({
+      ...a,
+      currentCount: 0,
+      unlocked: false,
+      unlockedAt: undefined,
+    }));
+    this.achievements.set(userId, resetAchs);
+
+    return this.getUserById(userId);
   }
 
   updateUser(id: string, updates: Partial<User>): User | undefined {
@@ -1131,8 +1673,74 @@ class Database {
     return Array.from(this.moderationReports.values());
   }
 
+  likePost(postId: string): number {
+    const post = this.communityPosts.get(postId);
+    if (!post) return 0;
+    post.likes = (post.likes || 0) + 1;
+    this.communityPosts.set(postId, post);
+    return post.likes;
+  }
+
   deletePost(postId: string): boolean {
     return this.communityPosts.delete(postId);
+  }
+
+  // Community Expressions (Idioms, Slangs, Phrasal Verbs)
+  getCommunityExpressions(category?: string): CommunityExpression[] {
+    let list = Array.from(this.communityExpressions.values());
+    if (category && category !== 'all') {
+      list = list.filter((e) => e.category === category);
+    }
+    return list.sort((a, b) => b.likes - a.likes || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  addCommunityExpression(data: Omit<CommunityExpression, 'id' | 'likes' | 'createdAt'>): CommunityExpression {
+    const id = `exp_${Date.now()}`;
+    const newExp: CommunityExpression = {
+      ...data,
+      id,
+      likes: 0,
+      createdAt: new Date().toISOString(),
+    };
+    this.communityExpressions.set(id, newExp);
+    return newExp;
+  }
+
+  likeCommunityExpression(id: string): number {
+    const exp = this.communityExpressions.get(id);
+    if (!exp) return 0;
+    exp.likes = (exp.likes || 0) + 1;
+    this.communityExpressions.set(id, exp);
+    return exp.likes;
+  }
+
+  // Grammar Help Tips & Common Persian Mistakes
+  getGrammarHelpTips(category?: string): GrammarHelpTip[] {
+    let list = Array.from(this.grammarHelpTips.values());
+    if (category && category !== 'all') {
+      list = list.filter((g) => g.category === category);
+    }
+    return list.sort((a, b) => b.likes - a.likes || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  addGrammarHelpTip(data: Omit<GrammarHelpTip, 'id' | 'likes' | 'createdAt'>): GrammarHelpTip {
+    const id = `gtip_${Date.now()}`;
+    const newTip: GrammarHelpTip = {
+      ...data,
+      id,
+      likes: 0,
+      createdAt: new Date().toISOString(),
+    };
+    this.grammarHelpTips.set(id, newTip);
+    return newTip;
+  }
+
+  likeGrammarHelpTip(id: string): number {
+    const tip = this.grammarHelpTips.get(id);
+    if (!tip) return 0;
+    tip.likes = (tip.likes || 0) + 1;
+    this.grammarHelpTips.set(id, tip);
+    return tip.likes;
   }
 
   // Scenarios & Video Lessons

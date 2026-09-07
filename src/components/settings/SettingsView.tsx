@@ -14,6 +14,7 @@ import {
   Save,
   HelpCircle,
   Sparkles,
+  RotateCcw,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import { useLanguage } from '../../context/LanguageContext.js';
@@ -24,9 +25,12 @@ interface SettingsViewProps {
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({ onNavigate }) => {
-  const { user, updateUserProfile, logout } = useAuth();
+  const { user, updateUserProfile, logout, resetProgress } = useAuth();
   const { language, setLanguage, t, dir } = useLanguage();
   const { theme, setTheme, isDark } = useTheme();
+
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   // Account Form State
   const [fullName, setFullName] = useState(user?.fullName || '');
@@ -448,7 +452,50 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* 7. App Info & Logout */}
+      {/* 7. Danger Zone: Reset All Data to Zero */}
+      <div className="p-6 rounded-3xl bg-amber-50/40 dark:bg-slate-900/80 border border-amber-200/70 dark:border-amber-900/40 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 border-b border-amber-200/60 dark:border-amber-900/40 pb-3">
+          <RotateCcw className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+          <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+            {language === 'fa' ? 'شروع مجدد و پاکسازی پیشرفت (Reset to 0)' : 'Reset Progress to Zero'}
+          </h2>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+              {language === 'fa'
+                ? 'تنظیم تمام امتیازات (XP)، استمرار (Streak)، لغات ذخیره‌شده و کوئیزها از صفر مطلق.'
+                : 'Reset your XP, streak, bookmarks and quiz attempts back to 0.'}
+            </p>
+            {resetSuccess && (
+              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                {language === 'fa' ? 'پیشرفت شما با موفقیت به صفر بازنشانی شد!' : 'Progress successfully reset to 0!'}
+              </span>
+            )}
+          </div>
+
+          <button
+            onClick={async () => {
+              if (window.confirm('آیا مطمئنید که می‌خواهید همه چیز را از صفر شروع کنید؟')) {
+                setIsResetting(true);
+                await resetProgress();
+                setIsResetting(false);
+                setResetSuccess(true);
+                setTimeout(() => setResetSuccess(false), 4000);
+              }
+            }}
+            disabled={isResetting}
+            className="px-4 py-2.5 rounded-xl border border-amber-300 dark:border-amber-800 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-transform active:scale-95 disabled:opacity-50 flex-shrink-0"
+          >
+            <RotateCcw className={`w-4 h-4 ${isResetting ? 'animate-spin' : ''}`} />
+            <span>{language === 'fa' ? 'شروع از صفر' : 'Reset to 0'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 8. App Info & Logout */}
       <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="text-center sm:text-start space-y-1">
           <div className="flex items-center justify-center sm:justify-start gap-2">
@@ -465,7 +512,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onNavigate }) => {
         </div>
 
         <button
-          onClick={logout}
+          onClick={async () => {
+            await logout();
+            if (onNavigate) onNavigate('dashboard');
+          }}
           className="px-5 py-2.5 rounded-2xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-bold text-xs flex items-center gap-2 hover:bg-rose-100 transition-colors"
         >
           <LogOut className="w-4 h-4" />

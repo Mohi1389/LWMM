@@ -12,16 +12,16 @@ vocabularyRouter.get('/list', (req, res) => {
 
 // Get user's saved/bookmarked words
 vocabularyRouter.get('/saved', (req, res) => {
-  const user = getAuthUser(req) || db.getUserById('usr_demo_1');
-  if (!user) return res.status(401).json({ error: 'کاربر یافت نشد' });
+  const user = getAuthUser(req);
+  if (!user) return res.json([]);
   const saved = db.getSavedWords(user.id);
   res.json(saved);
 });
 
 // Bookmark / Save word
 vocabularyRouter.post('/save', (req, res) => {
-  const user = getAuthUser(req) || db.getUserById('usr_demo_1');
-  if (!user) return res.status(401).json({ error: 'کاربر یافت نشد' });
+  const user = getAuthUser(req);
+  if (!user) return res.status(401).json({ error: 'برای ذخیره لغت ابتدا وارد حساب شوید' });
   const { wordId } = req.body;
   if (!wordId) return res.status(400).json({ error: 'شناسه لغت الزامی است' });
 
@@ -31,8 +31,8 @@ vocabularyRouter.post('/save', (req, res) => {
 
 // Unsave word
 vocabularyRouter.post('/unsave', (req, res) => {
-  const user = getAuthUser(req) || db.getUserById('usr_demo_1');
-  if (!user) return res.status(401).json({ error: 'کاربر یافت نشد' });
+  const user = getAuthUser(req);
+  if (!user) return res.status(401).json({ error: 'برای تغییر لغات ابتدا وارد حساب شوید' });
   const { wordId } = req.body;
   if (!wordId) return res.status(400).json({ error: 'شناسه لغت الزامی است' });
 
@@ -42,8 +42,8 @@ vocabularyRouter.post('/unsave', (req, res) => {
 
 // Mark word as learned
 vocabularyRouter.post('/learned', (req, res) => {
-  const user = getAuthUser(req) || db.getUserById('usr_demo_1');
-  if (!user) return res.status(401).json({ error: 'کاربر یافت نشد' });
+  const user = getAuthUser(req);
+  if (!user) return res.status(401).json({ error: 'برای ثبت پیشرفت ابتدا وارد حساب شوید' });
   const { wordId } = req.body;
   if (!wordId) return res.status(400).json({ error: 'شناسه لغت الزامی است' });
 
@@ -53,8 +53,8 @@ vocabularyRouter.post('/learned', (req, res) => {
 
 // Get learned words
 vocabularyRouter.get('/learned', (req, res) => {
-  const user = getAuthUser(req) || db.getUserById('usr_demo_1');
-  if (!user) return res.status(401).json({ error: 'کاربر یافت نشد' });
+  const user = getAuthUser(req);
+  if (!user) return res.json([]);
   const words = db.getLearnedWords(user.id);
   res.json(words);
 });

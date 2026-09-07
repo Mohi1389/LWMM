@@ -7,16 +7,77 @@ export const learningRouter = Router();
 
 // Get personalized learning progress and dashboard data
 learningRouter.get('/progress', (req, res) => {
-  const user = getAuthUser(req) || db.getUserById('usr_demo_1');
-  if (!user) return res.status(401).json({ error: 'کاربر یافت نشد' });
+  const user = getAuthUser(req);
+  const today = new Date().toISOString().split('T')[0];
+
+  if (!user) {
+    const guestProgress: LearningProgress = {
+      userId: 'guest',
+      level: 'beginner',
+      totalXp: 0,
+      streakDays: 0,
+      learnedWordIds: [],
+      completedQuizIds: [],
+      completedLessonIds: [],
+      todayGoal: {
+        date: today,
+        wordsLearned: 0,
+        targetWords: 5,
+        aiPracticeDone: false,
+        quizCompleted: false,
+        completed: false,
+      },
+      recentActivity: [],
+      weakTopics: [],
+      recommendedLessons: [
+        {
+          id: 'rec_1',
+          titleFa: 'یادگیری حروف اضافه زمان و مکان',
+          titleEn: 'Mastering Prepositions of Time & Place',
+          type: 'grammar',
+          reasonFa: 'شروع یادگیری با اصول اولیه گرامر',
+        },
+        {
+          id: 'rec_2',
+          titleFa: 'مکالمه کلاسی و معرفی خود',
+          titleEn: 'Classroom & Self-Introduction Dialogue',
+          type: 'conversation',
+          reasonFa: 'تطبیق با هدف تقویت مهارت مکالمه',
+        },
+      ],
+    };
+    return res.json(guestProgress);
+  }
 
   const learnedWords = db.getLearnedWords(user.id);
   const quizResults = db.getUserQuizHistory(user.id);
-  const today = new Date().toISOString().split('T')[0];
 
-  const wordsLearnedToday = learnedWords.length > 0 ? Math.min(5, learnedWords.length) : 2;
-  const aiPracticeDone = true;
+  const wordsLearnedToday = Math.min(5, learnedWords.length);
+  const aiPracticeDone = false;
   const quizCompleted = quizResults.length > 0;
+
+  const recentActivity: any[] = [];
+  if (learnedWords.length > 0) {
+    const lastWord = learnedWords[learnedWords.length - 1];
+    recentActivity.push({
+      id: `act_w_${lastWord.id}`,
+      type: 'word',
+      title: `یادگیری کلمه "${lastWord.english}"`,
+      timestamp: 'امروز',
+      xpEarned: 10,
+    });
+  }
+
+  if (quizResults.length > 0) {
+    const lastQuiz = quizResults[0];
+    recentActivity.push({
+      id: `act_q_${lastQuiz.id}`,
+      type: 'quiz',
+      title: `آزمون تعیین سطح / تست زبان`,
+      timestamp: 'اخیراً',
+      xpEarned: Math.round(lastQuiz.score * 10),
+    });
+  }
 
   const progress: LearningProgress = {
     userId: user.id,
@@ -25,7 +86,7 @@ learningRouter.get('/progress', (req, res) => {
     streakDays: user.streak,
     learnedWordIds: learnedWords.map((w) => w.id),
     completedQuizIds: quizResults.map((q) => q.quizId),
-    completedLessonIds: ['les_grammar_1', 'les_vocab_daily'],
+    completedLessonIds: [],
     todayGoal: {
       date: today,
       wordsLearned: wordsLearnedToday,
@@ -34,44 +95,22 @@ learningRouter.get('/progress', (req, res) => {
       quizCompleted,
       completed: wordsLearnedToday >= 5 && aiPracticeDone && quizCompleted,
     },
-    recentActivity: [
-      {
-        id: 'act_1',
-        type: 'word',
-        title: 'یادگیری کلمه "Resilient"',
-        timestamp: 'امروز، ۱۰:۱۵',
-        xpEarned: 10,
-      },
-      {
-        id: 'act_2',
-        type: 'ai_chat',
-        title: 'تمرین سفارش غذا در رستوران',
-        timestamp: 'امروز، ۰۹:۳۰',
-        xpEarned: 30,
-      },
-      {
-        id: 'act_3',
-        type: 'quiz',
-        title: 'آزمون لغات: احساسات و صفات',
-        timestamp: 'دیروز',
-        xpEarned: 40,
-      },
-    ],
-    weakTopics: ['حروف اضافه زمان و مکان', 'تفاوت Remember و Remind'],
+    recentActivity,
+    weakTopics: [],
     recommendedLessons: [
       {
         id: 'rec_1',
         titleFa: 'استفاده صحیح از حروف اضافه In, On, At',
         titleEn: 'Mastering Prepositions of Time & Place',
         type: 'grammar',
-        reasonFa: 'بر اساس پاسخ‌های اخیر در آزمون گرامر',
+        reasonFa: 'شروع یادگیری با اصول اولیه گرامر',
       },
       {
         id: 'rec_2',
         titleFa: 'تمرین مکالمه: معرفی خود در مدرسه و دانشگاه',
         titleEn: 'Classroom & Self-Introduction Dialogue',
         type: 'conversation',
-        reasonFa: 'تطبیق با هدف یادگیری مکالمه روان',
+        reasonFa: 'تطبیق با هدف تقویت مهارت مکالمه',
       },
       {
         id: 'rec_3',

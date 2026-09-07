@@ -4,23 +4,24 @@ interface LogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   showText?: boolean;
   className?: string;
+  hideTextOnMobile?: boolean;
 }
 
-export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, className = '' }) => {
+export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, className = '', hideTextOnMobile = false }) => {
   const sizeMap = {
-    sm: { icon: 'w-7 h-7', text: 'text-sm font-bold', sub: 'text-[10px]' },
-    md: { icon: 'w-9 h-9', text: 'text-base font-extrabold', sub: 'text-xs' },
-    lg: { icon: 'w-12 h-12', text: 'text-xl font-black', sub: 'text-xs' },
-    xl: { icon: 'w-16 h-16', text: 'text-2xl font-black', sub: 'text-sm' },
+    sm: { icon: 'w-7 h-7 min-w-[28px]', text: 'text-xs sm:text-sm font-bold', sub: 'text-[9px] sm:text-[10px]' },
+    md: { icon: 'w-8 h-8 sm:w-9 sm:h-9 min-w-[32px] sm:min-w-[36px]', text: 'text-sm sm:text-base font-extrabold', sub: 'text-[10px] sm:text-xs' },
+    lg: { icon: 'w-10 h-10 sm:w-12 sm:h-12 min-w-[40px] sm:min-w-[48px]', text: 'text-lg sm:text-xl font-black', sub: 'text-xs' },
+    xl: { icon: 'w-14 h-14 sm:w-16 sm:h-16 min-w-[56px] sm:min-w-[64px]', text: 'text-xl sm:text-2xl font-black', sub: 'text-xs sm:text-sm' },
   };
 
   const currentSize = sizeMap[size];
 
   return (
-    <div className={`inline-flex items-center gap-2.5 select-none ${className}`} id="app-logo">
+    <div className={`inline-flex items-center gap-2 sm:gap-2.5 select-none ${className}`} id="app-logo">
       {/* Modern Tri-Concept Icon: Learning (Book) + AI (Neural Spark) + Growth (Ascending Sprout) */}
       <div
-        className={`relative ${currentSize.icon} flex items-center justify-center rounded-xl bg-gradient-to-tr from-sky-600 via-cyan-500 to-coral-500 shadow-md shadow-sky-500/20 text-white overflow-hidden p-1.5`}
+        className={`relative ${currentSize.icon} flex-shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-tr from-sky-600 via-cyan-500 to-coral-500 shadow-md shadow-sky-500/20 text-white overflow-hidden p-1.5`}
         style={{
           background: 'linear-gradient(135deg, #0284c7 0%, #06b6d4 50%, #f97316 100%)',
         }}
@@ -64,13 +65,13 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, classN
       </div>
 
       {showText && (
-        <div className="flex flex-col text-start">
+        <div className={`flex flex-col text-start truncate ${hideTextOnMobile ? 'hidden sm:flex' : 'flex'}`}>
           <span
-            className={`${currentSize.text} tracking-tight font-en bg-gradient-to-r from-sky-700 via-sky-900 to-slate-900 dark:from-sky-300 dark:via-cyan-200 dark:to-white bg-clip-text text-transparent`}
+            className={`${currentSize.text} tracking-tight font-en bg-gradient-to-r from-sky-700 via-sky-900 to-slate-900 dark:from-sky-300 dark:via-cyan-200 dark:to-white bg-clip-text text-transparent truncate leading-tight`}
           >
             Learn with Mohanna
           </span>
-          <span className={`${currentSize.sub} font-fa font-medium text-slate-500 dark:text-slate-400 -mt-0.5`}>
+          <span className={`${currentSize.sub} font-fa font-medium text-slate-500 dark:text-slate-400 -mt-0.5 truncate hidden xs:inline`}>
             آموزش هوشمند زبان انگلیسی
           </span>
         </div>

@@ -64,6 +64,7 @@ export interface QuizQuestion {
   promptFa: string;
   promptEn: string;
   options: string[];
+  optionsFa?: string[];
   correctAnswer: string;
   explanationFa: string;
   explanationEn: string;
@@ -96,11 +97,17 @@ export interface QuizResult {
     questionId: string;
     userAnswer: string;
     isCorrect: boolean;
+    timeSpentSeconds?: number;
   }[];
   strengths: string[];
   weaknesses: string[];
   recommendedPath: string;
   estimatedLevel?: EnglishLevel;
+  timeSpentSeconds?: number;
+  averageSecondsPerQuestion?: number;
+  speedRating?: 'lightning' | 'fast' | 'moderate' | 'careful';
+  speedAssessmentFa?: string;
+  levelReasonFa?: string;
   completedAt: string;
 }
 
@@ -236,6 +243,37 @@ export interface ModerationReport {
   reason: string;
   status: 'pending' | 'resolved' | 'dismissed';
   createdAt: string;
+}
+
+export interface CommunityExpression {
+  id: string;
+  english: string;
+  persian: string;
+  pronunciation?: string;
+  exampleEn: string;
+  exampleFa: string;
+  usageNoteFa?: string;
+  category: 'slang' | 'idiom' | 'phrasal_verb' | 'daily' | 'formal';
+  difficulty: 'beginner' | 'intermediate';
+  likes: number;
+  submittedBy?: string;
+  createdAt: string;
+}
+
+export interface GrammarHelpTip {
+  id: string;
+  titleFa: string;
+  titleEn?: string;
+  category: 'tenses' | 'prepositions' | 'common_mistakes' | 'sentence_structure';
+  incorrectExample: string;
+  correctExample: string;
+  explanationFa: string;
+  goldenRuleFa?: string;
+  persianContext?: string;
+  difficulty: 'beginner' | 'elementary' | 'pre-intermediate';
+  viewsCount?: number;
+  likes: number;
+  createdAt?: string;
 }
 
 export interface SubtitleItem {
