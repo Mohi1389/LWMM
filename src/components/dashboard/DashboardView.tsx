@@ -19,6 +19,7 @@ import {
 import { useAuth } from '../../context/AuthContext.js';
 import { useLanguage } from '../../context/LanguageContext.js';
 import { LearningProgress, VocabularyWord } from '../../types/index.js';
+import { initialVocab } from '../../data/seedData.js';
 
 interface DashboardViewProps {
   onNavigate: (tab: string, subTab?: string) => void;
@@ -29,7 +30,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   const { language, t } = useLanguage();
 
   const [progress, setProgress] = useState<LearningProgress | null>(null);
-  const [wordOfTheDay, setWordOfTheDay] = useState<VocabularyWord | null>(null);
+  const [wordOfTheDay, setWordOfTheDay] = useState<VocabularyWord | null>(initialVocab[0] || null);
   const [isWordSaved, setIsWordSaved] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 

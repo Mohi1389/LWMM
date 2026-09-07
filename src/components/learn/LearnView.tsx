@@ -19,6 +19,7 @@ import {
 import { useAuth } from '../../context/AuthContext.js';
 import { useLanguage } from '../../context/LanguageContext.js';
 import { VocabularyWord, EnglishLevel } from '../../types/index.js';
+import { initialVocab } from '../../data/seedData.js';
 
 interface LearnViewProps {
   onNavigateToAI: (initialPrompt?: string) => void;
@@ -29,7 +30,7 @@ export const LearnView: React.FC<LearnViewProps> = ({ onNavigateToAI }) => {
   const { language, t } = useLanguage();
 
   const [activeSubTab, setActiveSubTab] = useState<'vocab' | 'dictionary' | 'grammar'>('vocab');
-  const [vocabulary, setVocabulary] = useState<VocabularyWord[]>([]);
+  const [vocabulary, setVocabulary] = useState<VocabularyWord[]>(initialVocab);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [learnedIds, setLearnedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');

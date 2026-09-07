@@ -4,6 +4,10 @@ const config: CapacitorConfig = {
   appId: 'com.lwmm.app',
   appName: 'LWMM',
   webDir: 'dist',
+  server: {
+    androidScheme: 'https',
+    cleartext: true,
+  },
 };
 
 export default config;

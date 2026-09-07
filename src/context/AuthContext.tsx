@@ -102,7 +102,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password: pass }),
       });
-      const data = await res.json();
+      let data: any = {};
+      try {
+        data = await res.json();
+      } catch {
+        data = { error: 'پاسخ نامعتبر از سرور' };
+      }
+
       if (res.ok && data.user) {
         setUser(data.user);
         setToken(data.token);
@@ -131,7 +137,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-      const data = await res.json();
+      let data: any = {};
+      try {
+        data = await res.json();
+      } catch {
+        data = { error: 'پاسخ نامعتبر از سرور' };
+      }
+
       if (res.ok && data.user) {
         setUser(data.user);
         setToken(data.token);

@@ -70,6 +70,9 @@ export const translations = {
 
     // Auth
     auth: {
+      login: 'ورود',
+      signup: 'ثبت‌نام',
+      forgotPassword: 'فراموشی رمز عبور؟',
       loginTitle: 'ورود به حساب کاربری',
       signupTitle: 'ساخت حساب کاربری جدید',
       forgotPasswordTitle: 'بازیابی رمز عبور',
@@ -409,6 +412,9 @@ export const translations = {
 
     // Auth
     auth: {
+      login: 'Sign In',
+      signup: 'Sign Up',
+      forgotPassword: 'Forgot Password?',
       loginTitle: 'Sign In to Your Account',
       signupTitle: 'Create a New Account',
       forgotPasswordTitle: 'Reset Password',

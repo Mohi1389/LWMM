@@ -1,5 +1,9 @@
 {
 	"appId": "com.lwmm.app",
 	"appName": "LWMM",
-	"webDir": "dist"
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https",
+		"cleartext": true
+	}
 }

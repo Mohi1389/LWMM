@@ -23,12 +23,13 @@ import {
 import { useAuth } from '../../context/AuthContext.js';
 import { useLanguage } from '../../context/LanguageContext.js';
 import { Quiz, QuizQuestion, QuizResult } from '../../types/index.js';
+import { initialQuizzes } from '../../data/seedData.js';
 
 export const QuizHubView: React.FC = () => {
   const { openPlacementModal, addXp } = useAuth();
   const { language } = useLanguage();
 
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [quizzes, setQuizzes] = useState<Quiz[]>(initialQuizzes);
   const [activeQuiz, setActiveQuiz] = useState<Quiz | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<{ [qId: string]: string }>({});

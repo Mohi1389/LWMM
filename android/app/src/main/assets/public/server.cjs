@@ -3021,6 +3021,15 @@ async function startServer() {
   const app = (0, import_express9.default)();
   const PORT = 3e3;
   app.use(import_express9.default.json());
+  app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    if (req.method === "OPTIONS") {
+      return res.sendStatus(200);
+    }
+    next();
+  });
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", name: "Learn with Mohanna API", timestamp: (/* @__PURE__ */ new Date()).toISOString() });
   });

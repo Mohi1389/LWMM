@@ -19,12 +19,13 @@ import {
 import { useAuth } from '../../context/AuthContext.js';
 import { useLanguage } from '../../context/LanguageContext.js';
 import { Quiz, QuizQuestion, QuizResult } from '../../types/index.js';
+import { placementQuiz } from '../../data/seedData.js';
 
 export const PlacementTestModal: React.FC = () => {
   const { isPlacementModalOpen, closePlacementModal, updateUserLevel, addXp } = useAuth();
   const { language } = useLanguage();
 
-  const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [quiz, setQuiz] = useState<Quiz | null>(placementQuiz);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<{ [qId: string]: string }>({});

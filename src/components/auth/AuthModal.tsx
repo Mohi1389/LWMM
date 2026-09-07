@@ -55,7 +55,12 @@ export const AuthModal: React.FC = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),
         });
-        const data = await res.json();
+        let data: any = {};
+        try {
+          data = await res.json();
+        } catch {
+          data = { message: 'لینک بازیابی ارسال شد.' };
+        }
         setSuccessMsg(data.message || 'لینک بازیابی ارسال شد.');
       }
     } catch (err: any) {
