@@ -1314,6 +1314,153 @@ class Database {
     this.videoLessons.set(v1.id, v1);
     this.videoLessons.set(v2.id, v2);
 
+    const v3: VideoContent = {
+      id: 'vid_inside_out',
+      titleEn: 'Inside Out - Naming and Managing Emotions',
+      titleFa: 'انیمیشن درون و بیرون: نام‌گذاری و بیان احساسات',
+      descriptionEn: 'Learn how to describe complex emotional states, empathy, and psychological terms.',
+      descriptionFa: 'یادگیری واژگان مرتبط با هیجانات انسانی (شادی، غم، ترس، خشم و چندش) با کاراکترهای جذاب پیکسار.',
+      thumbnail: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80',
+      videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+      duration: '01:50',
+      level: 'beginner',
+      category: 'animation',
+      subtitles: [
+        {
+          id: 'sub_io1',
+          startTime: 0,
+          endTime: 5,
+          textEn: 'Do you ever look at someone and wonder, what is going on inside their head?',
+          textFa: 'تا حالا شده به کسی نگاه کنی و از خودت بپرسی توی سرش چی می‌گذره؟',
+          keyWords: [
+            { word: 'wonder', meaningFa: 'در شگفت بودن / از خود پرسیدن' },
+            { word: 'inside', meaningFa: 'درون / داخل' },
+          ],
+        },
+        {
+          id: 'sub_io2',
+          startTime: 5.5,
+          endTime: 10,
+          textEn: 'Joy, Sadness, Anger, Fear, and Disgust make a unique team.',
+          textFa: 'شادی، غم، خشم، ترس و انزجار یک تیم منحصربه‌فرد را تشکیل می‌دهند.',
+          keyWords: [
+            { word: 'unique', meaningFa: 'بی‌نظیر / منحصر‌به‌فرد' },
+            { word: 'disgust', meaningFa: 'انزجار / بیزاری' },
+          ],
+        },
+      ],
+      keyPhrases: [
+        { en: 'What is going on', fa: 'چه اتفاقی در حال رخ دادن است؟', explanation: 'عبارتی بسیار رایج برای پرسیدن اوضاع یا احوال.' },
+        { en: 'Inside their head', fa: 'در ذهن و فکر آن‌ها', explanation: 'اصطلاح استعاری برای طرز فکر و احساسات درونی افراد.' },
+      ],
+    };
+
+    const v4: VideoContent = {
+      id: 'vid_kungfu_panda',
+      titleEn: 'Kung Fu Panda - The Secret of the Dragon Scroll',
+      titleFa: 'انیمیشن پاندای کونگ‌فوکار: راز درونی موفقیت و حال حاضر',
+      descriptionEn: 'Inspiring dialogues about believing in yourself, destiny, and hard work.',
+      descriptionFa: 'دیالوگ‌های انگیزشی استاد اوگوی و پو در مورد باور داشتن به خود و عدم وجود تصادف در سرنوشت.',
+      thumbnail: 'https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=800&auto=format&fit=crop&q=80',
+      videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+      duration: '02:10',
+      level: 'elementary',
+      category: 'animation',
+      subtitles: [
+        {
+          id: 'sub_kp1',
+          startTime: 0,
+          endTime: 5,
+          textEn: 'Yesterday is history, tomorrow is a mystery, but today is a gift.',
+          textFa: 'دیروز تاریخ است، فردا یک معماست، اما امروز یک هدیه است.',
+          keyWords: [
+            { word: 'mystery', meaningFa: 'راز / معما' },
+            { word: 'history', meaningFa: 'گذشته / تاریخ' },
+          ],
+        },
+        {
+          id: 'sub_kp2',
+          startTime: 5.5,
+          endTime: 10,
+          textEn: 'That is why it is called the present!',
+          textFa: 'به همین دلیل است که به آن زمان حال (یا هدیه) می‌گویند!',
+          keyWords: [
+            { word: 'present', meaningFa: 'زمان حال / هدیه (کلمه با دو معنی)' },
+          ],
+        },
+      ],
+      keyPhrases: [
+        { en: 'That is why', fa: 'به همین دلیل است که...', explanation: 'عبارت ربطی برای بیان علت و نتیجه یک مفهوم.' },
+        { en: 'The present', fa: 'زمان حال / پیشکش و کادو', explanation: 'بازی زبانی زیبا در زبان انگلیسی روی دو معنای واژه present.' },
+      ],
+    };
+
+    const v5: VideoContent = {
+      id: 'vid_harry_potter',
+      titleEn: 'Harry Potter - Bravery and Choice',
+      titleFa: 'هری پاتر: انتخاب شجاعت به جای آسودگی',
+      descriptionEn: 'Dumbledore quotes about how our choices define who we truly are.',
+      descriptionFa: 'آموزش کاربرد افعال مدال و ساختارهای مقایسه‌ای با جملات تأثیرگذار دامبلدور در هاگوارتز.',
+      thumbnail: 'https://images.unsplash.com/photo-1551269901-5c5e14c25df7?w=800&auto=format&fit=crop&q=80',
+      videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      duration: '02:30',
+      level: 'pre-intermediate',
+      category: 'movie',
+      subtitles: [
+        {
+          id: 'sub_hp1',
+          startTime: 0,
+          endTime: 5,
+          textEn: 'It is our choices that show what we truly are, far more than our abilities.',
+          textFa: 'این انتخاب‌های ما هستند که نشان می‌دهند ما واقعاً کیستیم، بسیار بیشتر از توانایی‌هایمان.',
+          keyWords: [
+            { word: 'choices', meaningFa: 'انتخاب‌ها / گزینه‌ها' },
+            { word: 'abilities', meaningFa: 'استعدادها و توانایی‌ها' },
+          ],
+        },
+      ],
+      keyPhrases: [
+        { en: 'Far more than', fa: 'بسیار بیشتر از...', explanation: 'ساختار تشدید مقایسه برای تاکید قوی.' },
+        { en: 'What we truly are', fa: 'آنچه واقعاً هستیم', explanation: 'عبارت اسمی با ضمیر موصولی what.' },
+      ],
+    };
+
+    const v6: VideoContent = {
+      id: 'vid_interstellar',
+      titleEn: 'Interstellar - Love and Physics of Time',
+      titleFa: 'میان‌ستاره‌ای: پیوند عشق، بعد زمان و اراده انسان',
+      descriptionEn: 'Rich vocabulary on space, time dilation, and human endurance.',
+      descriptionFa: 'اصطلاحات علمی، فلسفی و واژگان سطح پیشرفته در شاهکار کریستوفر نولان.',
+      thumbnail: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80',
+      videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+      duration: '02:05',
+      level: 'pre-intermediate',
+      category: 'movie',
+      subtitles: [
+        {
+          id: 'sub_int1',
+          startTime: 0,
+          endTime: 6,
+          textEn: 'Love is the one thing we are capable of perceiving that transcends dimensions of time and space.',
+          textFa: 'عشق تنها چیزی است که قادریم درکش کنیم که از ابعاد زمان و مکان فراتر می‌رود.',
+          keyWords: [
+            { word: 'perceive', meaningFa: 'درک کردن / حس کردن' },
+            { word: 'transcend', meaningFa: 'فراتر رفتن / برتر بودن' },
+            { word: 'dimension', meaningFa: 'بُعد / زاویه' },
+          ],
+        },
+      ],
+      keyPhrases: [
+        { en: 'Capable of', fa: 'توانا در / دارای قابلیتِ', explanation: 'صفت capable همیشه با حرف اضافه of می‌آید.' },
+        { en: 'Time and space', fa: 'زمان و مکان', explanation: 'یکی از کلیدی‌ترین اصطلاحات فیزیک نجومی و فلسفه.' },
+      ],
+    };
+
+    this.videoLessons.set(v3.id, v3);
+    this.videoLessons.set(v4.id, v4);
+    this.videoLessons.set(v5.id, v5);
+    this.videoLessons.set(v6.id, v6);
+
     // 7. Achievements (All start locked from zero)
     const defaultAchievements: Achievement[] = [
       {

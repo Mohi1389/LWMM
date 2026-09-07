@@ -7,6 +7,7 @@ import {
   initialRooms,
   initialExpressions,
   initialGrammarTips,
+  initialVideoLessons,
 } from '../data/seedData.js';
 import { User, Quiz, QuizResult, VocabularyWord } from '../types/index.js';
 
@@ -398,6 +399,43 @@ export async function handleOfflineApi(pathname: string, init?: RequestInit): Pr
       todayMinutesSpent: 8,
       streakHistory: [true, true, true, false, false, false, false],
     });
+  }
+
+  // Videos (Movies & Animations)
+  if (pathname === '/api/learning/videos') {
+    return jsonResponse(initialVideoLessons);
+  }
+
+  // Achievements
+  if (pathname === '/api/learning/achievements') {
+    return jsonResponse([
+      {
+        id: 'ach_first_quiz',
+        code: 'FIRST_QUIZ',
+        titleFa: 'قدم اول قهرمان 🏅',
+        titleEn: 'First Quiz Completed',
+        descriptionFa: 'اولین کوئیز خود را با موفقیت پشت سر بگذارید.',
+        descriptionEn: 'Successfully complete your first English quiz.',
+        icon: 'award',
+        targetCount: 1,
+        currentCount: 0,
+        unlocked: false,
+        xpReward: 50,
+      },
+      {
+        id: 'ach_7_streak',
+        code: '7_DAY_STREAK',
+        titleFa: 'استمرار طلایی (۷ روز پیاپی) 🔥',
+        titleEn: '7-Day Streak Master',
+        descriptionFa: '۷ روز پشت سر هم تمرین روزانه را انجام دهید.',
+        descriptionEn: 'Practice English for 7 consecutive days.',
+        icon: 'flame',
+        targetCount: 7,
+        currentCount: 1,
+        unlocked: false,
+        xpReward: 100,
+      },
+    ]);
   }
 
   // 5. Community

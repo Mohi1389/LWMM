@@ -6,6 +6,7 @@ import {
   CommunityExpression,
   GrammarHelpTip,
   AIConversationScenario,
+  VideoContent,
 } from '../types/index.js';
 
 export const demoUser: User = {
@@ -1161,3 +1162,228 @@ export const initialGrammarTips: GrammarHelpTip[] = [
         createdAt: new Date(Date.now() - 86400000 * 6).toISOString(),
       },
     ];
+
+export const initialVideoLessons: VideoContent[] = [
+  {
+    id: 'vid_lion_king',
+    titleEn: 'The Lion King - Hakuna Matata Philosophy',
+    titleFa: 'انیمیشن شیر شاه: اصطلاحات آرامش و رهایی از استرس',
+    descriptionEn: 'Learn idioms about letting go of worries, simple present expressions, and casual greetings.',
+    descriptionFa: 'آموزش لغات و اصطلاحات پرکاربرد درباره غلبه بر استرس و نگرانی با دیالوگ‌های خاطره‌انگیز تیمون و پومبا.',
+    thumbnail: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&auto=format&fit=crop&q=80',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    duration: '02:15',
+    level: 'beginner',
+    category: 'animation',
+    subtitles: [
+      {
+        id: 'sub_1',
+        startTime: 0,
+        endTime: 4,
+        textEn: 'Hakuna Matata! What a wonderful phrase.',
+        textFa: 'هاکونا ماتاتا! چه عبارت شگفت‌انگیزی.',
+        keyWords: [{ word: 'wonderful', meaningFa: 'فوق‌العاده و شگفت‌انگیز' }],
+      },
+      {
+        id: 'sub_2',
+        startTime: 4.5,
+        endTime: 8,
+        textEn: 'It means no worries for the rest of your days.',
+        textFa: 'این یعنی بدون نگرانی برای بقیه روزهای عمرت.',
+        keyWords: [
+          { word: 'worries', meaningFa: 'نگرانی‌ها / دلواپسی‌ها' },
+          { word: 'the rest of', meaningFa: 'بقیه / مابقی' },
+        ],
+      },
+      {
+        id: 'sub_3',
+        startTime: 8.5,
+        endTime: 14,
+        textEn: "It's our problem-free philosophy!",
+        textFa: 'این فلسفه بدون دردسر و بدون مشکل ماست!',
+        keyWords: [{ word: 'philosophy', meaningFa: 'فلسفه و نگرش فکری' }],
+      },
+    ],
+    keyPhrases: [
+      { en: 'No worries', fa: 'اصلاً نگران نباش / فدای سرت', explanation: 'اصطلاحی عامیانه و بسیار پرکاربرد مشابه You are welcome یا Don\'t worry.' },
+      { en: 'Problem-free', fa: 'بدون دردسر و بدون مشکل', explanation: 'ترکیب کلمه با پسوند free به معنی عاری بودن از آن است.' },
+      { en: 'Rest of your days', fa: 'باقی‌مانده عمر و روزها', explanation: 'تعبیری شاعرانه برای اشاره به آینده.' },
+    ],
+  },
+  {
+    id: 'vid_inside_out',
+    titleEn: 'Inside Out - Naming and Managing Emotions',
+    titleFa: 'انیمیشن درون و بیرون: نام‌گذاری و بیان احساسات',
+    descriptionEn: 'Learn how to describe complex emotional states, empathy, and psychological terms.',
+    descriptionFa: 'یادگیری واژگان مرتبط با هیجانات انسانی (شادی، غم، ترس، خشم و چندش) با کاراکترهای جذاب پیکسار.',
+    thumbnail: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+    duration: '01:50',
+    level: 'beginner',
+    category: 'animation',
+    subtitles: [
+      {
+        id: 'sub_io1',
+        startTime: 0,
+        endTime: 5,
+        textEn: 'Do you ever look at someone and wonder, what is going on inside their head?',
+        textFa: 'تا حالا شده به کسی نگاه کنی و از خودت بپرسی توی سرش چی می‌گذره؟',
+        keyWords: [
+          { word: 'wonder', meaningFa: 'در شگفت بودن / از خود پرسیدن' },
+          { word: 'inside', meaningFa: 'درون / داخل' },
+        ],
+      },
+      {
+        id: 'sub_io2',
+        startTime: 5.5,
+        endTime: 10,
+        textEn: 'Joy, Sadness, Anger, Fear, and Disgust make a unique team.',
+        textFa: 'شادی، غم، خشم، ترس و انزجار یک تیم منحصربه‌فرد را تشکیل می‌دهند.',
+        keyWords: [
+          { word: 'unique', meaningFa: 'بی‌نظیر / منحصر‌به‌فرد' },
+          { word: 'disgust', meaningFa: 'انزجار / بیزاری' },
+        ],
+      },
+    ],
+    keyPhrases: [
+      { en: 'What is going on', fa: 'چه اتفاقی در حال رخ دادن است؟', explanation: 'عبارتی بسیار رایج برای پرسیدن اوضاع یا احوال.' },
+      { en: 'Inside their head', fa: 'در ذهن و فکر آن‌ها', explanation: 'اصطلاح استعاری برای طرز فکر و احساسات درونی افراد.' },
+    ],
+  },
+  {
+    id: 'vid_kungfu_panda',
+    titleEn: 'Kung Fu Panda - The Secret of the Dragon Scroll',
+    titleFa: 'انیمیشن پاندای کونگ‌فوکار: راز درونی موفقیت و حال حاضر',
+    descriptionEn: 'Inspiring dialogues about believing in yourself, destiny, and hard work.',
+    descriptionFa: 'دیالوگ‌های انگیزشی استاد اوگوی و پو در مورد باور داشتن به خود و عدم وجود تصادف در سرنوشت.',
+    thumbnail: 'https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=800&auto=format&fit=crop&q=80',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+    duration: '02:10',
+    level: 'elementary',
+    category: 'animation',
+    subtitles: [
+      {
+        id: 'sub_kp1',
+        startTime: 0,
+        endTime: 5,
+        textEn: 'Yesterday is history, tomorrow is a mystery, but today is a gift.',
+        textFa: 'دیروز تاریخ است، فردا یک معماست، اما امروز یک هدیه است.',
+        keyWords: [
+          { word: 'mystery', meaningFa: 'راز / معما' },
+          { word: 'history', meaningFa: 'گذشته / تاریخ' },
+        ],
+      },
+      {
+        id: 'sub_kp2',
+        startTime: 5.5,
+        endTime: 10,
+        textEn: 'That is why it is called the present!',
+        textFa: 'به همین دلیل است که به آن زمان حال (یا هدیه) می‌گویند!',
+        keyWords: [
+          { word: 'present', meaningFa: 'زمان حال / هدیه (کلمه با دو معنی)' },
+        ],
+      },
+    ],
+    keyPhrases: [
+      { en: 'That is why', fa: 'به همین دلیل است که...', explanation: 'عبارت ربطی برای بیان علت و نتیجه یک مفهوم.' },
+      { en: 'The present', fa: 'زمان حال / پیشکش و کادو', explanation: 'بازی زبانی زیبا در زبان انگلیسی روی دو معنای واژه present.' },
+    ],
+  },
+  {
+    id: 'vid_spiderman',
+    titleEn: 'Spider-Man - Great Power and Responsibility',
+    titleFa: 'مرد عنکبوتی: دیالوگ ماندگار قدرت و مسئولیت',
+    descriptionEn: 'Classic dialogue analyzing the famous proverb and modal verbs.',
+    descriptionFa: 'بررسی ساختار جملات پندآموز و افعال شرطی در یکی از مشهورترین دیالوگ‌های تاریخ سینما.',
+    thumbnail: 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=800&auto=format&fit=crop&q=80',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    duration: '01:45',
+    level: 'elementary',
+    category: 'movie',
+    subtitles: [
+      {
+        id: 'sub_s1',
+        startTime: 0,
+        endTime: 5,
+        textEn: 'Whatever life holds in store for me, I will never forget these words.',
+        textFa: 'زندگی هر چه در چنته برایم داشته باشد، هرگز این کلمات را فراموش نخواهم کرد.',
+        keyWords: [{ word: 'in store for', meaningFa: 'در تقدیر / آماده برای آینده' }],
+      },
+      {
+        id: 'sub_s2',
+        startTime: 5.5,
+        endTime: 10,
+        textEn: 'With great power comes great responsibility.',
+        textFa: 'همراه با قدرت بزرگ، مسئولیتی بزرگ پدید می‌آید.',
+        keyWords: [
+          { word: 'power', meaningFa: 'قدرت و توانایی' },
+          { word: 'responsibility', meaningFa: 'مسئولیت و وظیفه‌شناسی' },
+        ],
+      },
+    ],
+    keyPhrases: [
+      { en: 'In store for me', fa: 'در سرنوشت من رقم خورده', explanation: 'اصطلاحی زیبا برای پیش‌بینی وقایع آینده.' },
+      { en: 'Great responsibility', fa: 'مسئولیت خطیر و سنگین', explanation: 'کلمه responsibility از پرکاربردترین واژگان سطح متوسط است.' },
+    ],
+  },
+  {
+    id: 'vid_harry_potter',
+    titleEn: 'Harry Potter - Bravery and Choice',
+    titleFa: 'هری پاتر: انتخاب شجاعت به جای آسودگی',
+    descriptionEn: 'Dumbledore quotes about how our choices define who we truly are.',
+    descriptionFa: 'آموزش کاربرد افعال مدال و ساختارهای مقایسه‌ای با جملات تأثیرگذار دامبلدور در هاگوارتز.',
+    thumbnail: 'https://images.unsplash.com/photo-1551269901-5c5e14c25df7?w=800&auto=format&fit=crop&q=80',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+    duration: '02:30',
+    level: 'pre-intermediate',
+    category: 'movie',
+    subtitles: [
+      {
+        id: 'sub_hp1',
+        startTime: 0,
+        endTime: 5,
+        textEn: 'It is our choices that show what we truly are, far more than our abilities.',
+        textFa: 'این انتخاب‌های ما هستند که نشان می‌دهند ما واقعاً کیستیم، بسیار بیشتر از توانایی‌هایمان.',
+        keyWords: [
+          { word: 'choices', meaningFa: 'انتخاب‌ها / گزینه‌ها' },
+          { word: 'abilities', meaningFa: 'استعدادها و توانایی‌ها' },
+        ],
+      },
+    ],
+    keyPhrases: [
+      { en: 'Far more than', fa: 'بسیار بیشتر از...', explanation: 'ساختار تشدید مقایسه برای تاکید قوی.' },
+      { en: 'What we truly are', fa: 'آنچه واقعاً هستیم', explanation: 'عبارت اسمی با ضمیر موصولی what.' },
+    ],
+  },
+  {
+    id: 'vid_interstellar',
+    titleEn: 'Interstellar - Love and Physics of Time',
+    titleFa: 'میان‌ستاره‌ای: پیوند عشق، بعد زمان و اراده انسان',
+    descriptionEn: 'Rich vocabulary on space, time dilation, and human endurance.',
+    descriptionFa: 'اصطلاحات علمی، فلسفی و واژگان سطح پیشرفته در شاهکار کریستوفر نولان.',
+    thumbnail: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80',
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+    duration: '02:05',
+    level: 'pre-intermediate',
+    category: 'movie',
+    subtitles: [
+      {
+        id: 'sub_int1',
+        startTime: 0,
+        endTime: 6,
+        textEn: 'Love is the one thing we are capable of perceiving that transcends dimensions of time and space.',
+        textFa: 'عشق تنها چیزی است که قادریم درکش کنیم که از ابعاد زمان و مکان فراتر می‌رود.',
+        keyWords: [
+          { word: 'perceive', meaningFa: 'درک کردن / حس کردن' },
+          { word: 'transcend', meaningFa: 'فراتر رفتن / برتر بودن' },
+          { word: 'dimension', meaningFa: 'بُعد / زاویه' },
+        ],
+      },
+    ],
+    keyPhrases: [
+      { en: 'Capable of', fa: 'توانا در / دارای قابلیتِ', explanation: 'صفت capable همیشه با حرف اضافه of می‌آید.' },
+      { en: 'Time and space', fa: 'زمان و مکان', explanation: 'یکی از کلیدی‌ترین اصطلاحات فیزیک نجومی و فلسفه.' },
+    ],
+  },
+];
+
