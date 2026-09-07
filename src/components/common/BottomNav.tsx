@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, BookOpen, Bot, Award, Users, User as UserIcon } from 'lucide-react';
+import { Home, BookOpen, Bot, Award, Users, User as UserIcon, Film } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext.js';
 
 interface BottomNavProps {
@@ -25,9 +25,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   const navButtons = [
     { id: 'dashboard', icon: Home, labelFa: 'خانه', labelEn: 'Home' },
     { id: 'learn', icon: BookOpen, labelFa: 'درس‌ها', labelEn: 'Learn' },
+    { id: 'movies', icon: Film, labelFa: 'انیمیشن‌ها', labelEn: 'Movies' },
     { id: 'ai', icon: Bot, labelFa: 'مهنا AI', labelEn: 'AI Chat' },
     { id: 'quizzes', icon: Award, labelFa: 'آزمون‌ها', labelEn: 'Quizzes' },
-    { id: 'community', icon: Users, labelFa: 'جامعه', labelEn: 'Community' },
     { id: 'profile', icon: UserIcon, labelFa: 'پروفایل', labelEn: 'Profile' },
   ];
 
